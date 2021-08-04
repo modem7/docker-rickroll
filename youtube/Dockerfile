@@ -1,5 +1,6 @@
-FROM python:3
-WORKDIR /www
-COPY index.html .
-CMD exec python -m http.server
-EXPOSE 8000
+FROM nginx:stable-alpine
+
+COPY src/ /usr/share/nginx/html/
+COPY conf/nginx-site.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80 8080
