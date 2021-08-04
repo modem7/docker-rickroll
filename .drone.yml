@@ -23,11 +23,11 @@ steps:
       from_secret: docker_password
     tags: latest
 
-trigger:
-  event:
-  - cron
-  cron:
-  - rickroll_latest
+# trigger:
+  # event:
+  # - cron
+  # cron:
+  # - rickroll_latest
 
 ---
 
@@ -56,11 +56,11 @@ steps:
       from_secret: docker_password
     tags: latest
 
-trigger:
-  event:
-  - cron
-  cron:
-  - rickroll_monthly
+# trigger:
+  # event:
+  # - cron
+  # cron:
+  # - rickroll_monthly
 
 ---
 
@@ -89,8 +89,8 @@ steps:
       from_secret: docker_password
     tags: stable
 
-trigger:
-  event:
-  - cron
-  cron:
-  - rickroll_stable
+# trigger:
+  # event:
+  # - cron
+  # cron:
+  # - rickroll_stable
