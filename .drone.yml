@@ -147,5 +147,3 @@ steps:
 
 depends_on:
   - lint
-
----
