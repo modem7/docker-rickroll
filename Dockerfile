@@ -1,4 +1,4 @@
-FROM nginx:1.19
+FROM nginx:1.21
 
 ADD src/ /usr/share/nginx/html/
 ADD conf/nginx-site.conf /etc/nginx/conf.d/default.conf
