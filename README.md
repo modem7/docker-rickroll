@@ -23,8 +23,8 @@ services:
 ```
 
 # Tags
-Latest is built every week.
+Latest is automatically built every week.
 
-Monthly is built every month.
+Monthly is automatically built every month.
 
-Stable is built every year.
+Stable is automatically built every year.
