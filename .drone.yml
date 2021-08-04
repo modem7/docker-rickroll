@@ -111,11 +111,11 @@ steps:
       from_secret: docker_password
     tags: youtube
 
-trigger:
-  event:
-  - cron
-  cron:
-  - rickroll_youtube
+# trigger:
+  # event:
+  # - cron
+  # cron:
+  # - rickroll_youtube
 
 depends_on:
   - lint
