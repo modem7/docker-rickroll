@@ -11,11 +11,11 @@ Image is based on Nginx stable alpine, and all the content is local to the conta
 ![Capture](https://user-images.githubusercontent.com/4349962/128193774-d5c98641-56d7-471f-bc69-1d0d952a0d60.png)
 
 # Tags
-Latest is automatically built every week.
+:Latest is automatically built every week.
 
-Monthly is automatically built every month.
+:Monthly is automatically built every month.
 
-Youtube is automatically built every month, and uses an iFrame to embed a Youtube Video.
+:Youtube is automatically built every month, and uses an iFrame to embed a Youtube Video.
 
 # Configuration
 
