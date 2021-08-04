@@ -56,11 +56,11 @@ steps:
       from_secret: docker_password
     tags: monthly
 
-# trigger:
-  # event:
-  # - cron
-  # cron:
-  # - rickroll_monthly
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_monthly
 
 ---
 
