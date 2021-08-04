@@ -6,8 +6,7 @@ More info can be found here: https://www.youtube.com/watch?v=dQw4w9WgXcQ
 
 # Container Screenshot
 
-![image](https://user-images.githubusercontent.com/4349962/128193231-ca462c29-12d3-4711-9471-edd5f53ee93d.png)
-
+![image](https://user-images.githubusercontent.com/4349962/128193423-637ddc30-6b89-4c12-8905-0dbeb6abe9c6.png)
 
 # Configuration
 
