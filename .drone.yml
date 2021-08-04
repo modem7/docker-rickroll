@@ -43,6 +43,9 @@ trigger:
   cron:
   - rickroll_latest
 
+depends_on:
+  - lint
+
 ---
 
 kind: pipeline
@@ -76,6 +79,9 @@ trigger:
   cron:
   - rickroll_monthly
 
+depends_on:
+  - lint
+
 ---
 
 kind: pipeline
@@ -108,3 +114,6 @@ trigger:
   - cron
   cron:
   - rickroll_stable
+
+depends_on:
+  - lint
