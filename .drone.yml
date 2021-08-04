@@ -37,11 +37,11 @@ steps:
       from_secret: docker_password
     tags: latest
 
-# trigger:
-  # event:
-  # - cron
-  # cron:
-  # - rickroll_latest
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_latest
 
 depends_on:
   - lint
@@ -73,11 +73,11 @@ steps:
       from_secret: docker_password
     tags: monthly
 
-# trigger:
-  # event:
-  # - cron
-  # cron:
-  # - rickroll_monthly
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_monthly
 
 depends_on:
   - lint
@@ -109,11 +109,11 @@ steps:
       from_secret: docker_password
     tags: stable
 
-# trigger:
-  # event:
-  # - cron
-  # cron:
-  # - rickroll_stable
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_stable
 
 depends_on:
   - lint
