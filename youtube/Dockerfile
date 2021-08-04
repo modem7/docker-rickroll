@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:alpine
 WORKDIR /www
 COPY index.html .
 CMD exec python -m http.server
