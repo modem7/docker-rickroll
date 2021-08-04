@@ -4,7 +4,7 @@ type: docker
 name: lint
 steps:
   - name: Lint Dockerfile
-    image: hadolint/hadolint:latest-debian
+    image: hadolint/hadolint:latest-alpine
     pull: if-not-exists
     commands:
       - hadolint --version
