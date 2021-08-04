@@ -21,3 +21,10 @@ services:
     ports:
       - 80:80
 ```
+
+# Tags
+Latest is built every week.
+
+Monthly is built every month.
+
+Stable is built every year.
