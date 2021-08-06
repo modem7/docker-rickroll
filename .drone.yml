@@ -155,7 +155,7 @@ platform:
   arch: amd64
 
 steps:
-- name: test  
+- name: test build
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
