@@ -19,6 +19,7 @@ trigger:
   - rickroll_monthly
   - rickroll_youtube
   branch:
+  - master
   - test
 
 ---
