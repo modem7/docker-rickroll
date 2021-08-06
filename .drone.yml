@@ -149,6 +149,8 @@ steps:
     use_cache: true
     cache_from: "modem7/docker-rickroll:test"
     platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8
+    dockerfile: test/Dockerfile
+    context: test/
     username:
       from_secret: docker_username
     password:
