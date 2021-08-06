@@ -31,8 +31,6 @@ steps:
       - hadolint Dockerfile*
 
 trigger:
-  event:
-  - branch
   branch:
   - test
 
@@ -180,4 +178,4 @@ trigger:
   - test
 
 depends_on:
-  - lint
+  - linttest
