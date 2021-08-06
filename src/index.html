@@ -6,14 +6,14 @@
 </head>
 <body>
 <div style="text-align: center;">
-  <video width="100%" autoplay loop controls muted>
+  <video width="100%" loop controls="controls" poster="download.jpg" onclick="this.paused ? this.play() : this.pause();">
     <source src="/rickroll.mp4" type="video/mp4">
   </video>
 <style>
     video {
         height: 100vh;
         width: 100%;
-        object-fit: cover; // use "cover" to avoid distortion
+        object-fit: cover; /**/ use "cover" to avoid distortion
         position: absolute;
     }
 </style>
