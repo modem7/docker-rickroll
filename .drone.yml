@@ -13,10 +13,13 @@ steps:
 trigger:
   event:
   - cron
+  - branch
   cron:
   - rickroll_latest
   - rickroll_monthly
   - rickroll_youtube
+  branch:
+  - test
 
 ---
 
@@ -156,6 +159,10 @@ steps:
     password:
       from_secret: docker_password
     tags: test
+
+trigger:
+  branch:
+  - test
 
 depends_on:
   - lint
