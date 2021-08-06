@@ -10,6 +10,14 @@ steps:
       - hadolint --version
       - hadolint Dockerfile*
 
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_latest
+  - rickroll_monthly
+  - rickroll_youtube
+
 ---
 
 kind: pipeline
@@ -37,11 +45,11 @@ steps:
       from_secret: docker_password
     tags: latest
 
-# trigger:
-  # event:
-  # - cron
-  # cron:
-  # - rickroll_latest
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_latest
 
 depends_on:
   - lint
