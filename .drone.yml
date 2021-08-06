@@ -19,6 +19,22 @@ trigger:
   - rickroll_youtube
 
 ---
+kind: pipeline
+type: docker
+name: linttest
+steps:
+  - name: Lint Test Dockerfile
+    image: hadolint/hadolint:latest-alpine
+    pull: if-not-exists
+    commands:
+      - hadolint --version
+      - hadolint Dockerfile*
+
+trigger:
+  branch:
+  - test
+
+---
 
 kind: pipeline
 type: docker
@@ -119,14 +135,14 @@ steps:
       from_secret: docker_password
     tags: youtube
 
-# trigger:
-  # event:
-  # - cron
-  # cron:
-  # - rickroll_youtube
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_youtube
 
-# depends_on:
-  # - lint
+depends_on:
+  - lint
 
 ---
 
@@ -139,7 +155,7 @@ platform:
   arch: amd64
 
 steps:
-- name: test  
+- name: test build
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
@@ -157,5 +173,9 @@ steps:
       from_secret: docker_password
     tags: test
 
+trigger:
+  branch:
+  - test
+
 depends_on:
-  - lint
+  - linttest
