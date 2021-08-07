@@ -1,3 +1,6 @@
+########
+##LINT##
+########
 ---
 kind: pipeline
 type: docker
@@ -10,14 +13,17 @@ steps:
       - hadolint --version
       - hadolint Dockerfile*
 
-trigger:
-  event:
-  - cron
-  cron:
-  - rickroll_latest
-  - rickroll_monthly
-  - rickroll_youtube
+# trigger:
+  # event:
+  # - cron
+  # cron:
+  # - rickroll_latest
+  # - rickroll_monthly
+  # - rickroll_youtube
 
+#############
+##TEST LINT##
+#############
 ---
 kind: pipeline
 type: docker
@@ -33,6 +39,84 @@ steps:
 trigger:
   branch:
   - test
+
+##########
+##LATEST##
+##########
+---
+kind: pipeline
+type: docker
+name: buildlatest
+
+# steps:
+  # - name: Build Latest
+    # image: plugins/docker
+    # settings:
+      # username:
+        # from_secret: docker_username
+      # password:
+        # from_secret: docker_password
+      # purge: true
+      # cache_from: "modem7/docker-rickroll:latest"
+      # compress: true
+      # repo: modem7/docker-rickroll
+      # tags: build
+    # use_cache: true
+
+  - name: build
+    image: docker
+    volumes:
+    - name: dockersock
+      path: /var/run/docker.sock
+    commands:
+    - docker build -t foo:build
+
+# trigger:
+  # event:
+  # - cron
+  # cron:
+  # - rickroll_latest
+
+depends_on:
+  - lint
+
+---
+
+kind: pipeline
+type: docker
+name: testing
+
+steps:
+  # - name: Test Run
+    # image: modem7/docker-rickroll:build
+    # detach: true
+  
+  - name: Test Run
+    image: docker-rickroll:build
+    pull: if-not-exists
+    detach: true
+
+  - name: Pause
+    image: busybox:latest
+    commands:
+      - sleep 5
+
+  - name: Testing
+    image: docker-rickroll:build
+    commands:
+      - FILE=/usr/share/nginx/html/rickroll.mp4
+      - if [ -f "$FILE" ]; then
+      - echo "$FILE exists."
+      - exit 0
+      - else
+      - echo "$FILE does not exist."
+      - exit 1
+      - fi
+      - exit 78
+
+depends_on:
+  - buildlatest
+
 
 ---
 
@@ -69,9 +153,12 @@ trigger:
 
 depends_on:
   - lint
+  - buildlatet
 
+###########
+##MONTHLY##
+###########
 ---
-
 kind: pipeline
 type: docker
 name: monthly
@@ -106,8 +193,10 @@ trigger:
 depends_on:
   - lint
 
+###########
+##YOUTUBE##
+###########
 ---
-
 kind: pipeline
 type: docker
 name: Youtube
@@ -144,8 +233,10 @@ trigger:
 depends_on:
   - lint
 
+########
+##TEST##
+########
 ---
-
 kind: pipeline
 type: docker
 name: test
