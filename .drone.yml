@@ -73,8 +73,8 @@ name: buildlatest
   # cron:
   # - rickroll_latest
 
-depends_on:
-  - lint
+# depends_on:
+  # - lint
 
 ---
 
@@ -110,8 +110,8 @@ steps:
       - fi
       - exit 78
 
-depends_on:
-  - buildlatest
+# depends_on:
+  # - buildlatest
 
 
 ---
