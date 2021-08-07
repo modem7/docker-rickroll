@@ -1,27 +1,4 @@
-# ---
-# kind: pipeline
-# type: docker
-# name: lint
-# steps:
-  # - name: Lint Dockerfile
-    # image: hadolint/hadolint:latest-alpine
-    # pull: if-not-exists
-    # commands:
-      # - hadolint --version
-      # - hadolint Dockerfile*
-
-# trigger:
-  # event:
-    # - cron
-  # cron:
-    # - rickroll_latest
-    # - rickroll_monthly
-    # - rickroll_youtube
-
 ---
-########
-##LINT##
-########
 kind: pipeline
 type: docker
 name: lint
@@ -33,9 +10,13 @@ steps:
       - hadolint --version
       - hadolint Dockerfile*
 
-trigger:
-  branch:
-    - master
+# trigger:
+  # event:
+    # - cron
+  # cron:
+    # - rickroll_latest
+    # - rickroll_monthly
+    # - rickroll_youtube
 
 ---
 kind: pipeline
