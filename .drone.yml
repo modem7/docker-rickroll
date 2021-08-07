@@ -15,11 +15,11 @@ steps:
 
 trigger:
   event:
-  - cron
+    - cron
   cron:
-  - rickroll_latest
-  - rickroll_monthly
-  - rickroll_youtube
+    - rickroll_latest
+    - rickroll_monthly
+    - rickroll_youtube
 
 #############
 ##TEST LINT##
@@ -38,7 +38,7 @@ steps:
 
 trigger:
   branch:
-  - test
+    - test
 
 ##########
 ##LATEST##
@@ -66,10 +66,10 @@ name: buildlatest
   - name: build
     image: docker
     volumes:
-    - name: dockersock
-      path: /var/run/docker.sock
+      - name: dockersock
+        path: /var/run/docker.sock
     commands:
-    - docker build -t foo:build
+      - docker build -t foo:build
 
 # trigger:
   # event:
@@ -147,9 +147,9 @@ steps:
 
 trigger:
   event:
-  - cron
+    - cron
   cron:
-  - rickroll_latest
+    - rickroll_latest
 
 depends_on:
   - lint
@@ -186,12 +186,12 @@ steps:
 
 trigger:
   event:
-  - cron
+    - cron
   cron:
-  - rickroll_monthly
+    - rickroll_monthly
 
 depends_on:
-  - lint
+    - lint
 
 ###########
 ##YOUTUBE##
@@ -226,9 +226,9 @@ steps:
 
 trigger:
   event:
-  - cron
+    - cron
   cron:
-  - rickroll_youtube
+    - rickroll_youtube
 
 depends_on:
   - lint
@@ -266,7 +266,7 @@ steps:
 
 trigger:
   branch:
-  - test
+    - test
 
 depends_on:
   - linttest
