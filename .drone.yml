@@ -1,7 +1,7 @@
+---
 ########
 ##LINT##
 ########
----
 kind: pipeline
 type: docker
 name: lint
