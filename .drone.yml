@@ -13,13 +13,13 @@ steps:
       - hadolint --version
       - hadolint Dockerfile*
 
-# trigger:
-  # event:
-  # - cron
-  # cron:
-  # - rickroll_latest
-  # - rickroll_monthly
-  # - rickroll_youtube
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_latest
+  - rickroll_monthly
+  - rickroll_youtube
 
 #############
 ##TEST LINT##
