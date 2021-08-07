@@ -1,25 +1,26 @@
----
-########
-##LINT##
-########
-kind: pipeline
-type: docker
-name: lint
-steps:
-  - name: Lint Dockerfile
-    image: hadolint/hadolint:latest-alpine
-    pull: if-not-exists
-    commands:
-      - hadolint --version
-      - hadolint Dockerfile*
+# ---
+# ########
+# ##LINT##
+# ########
+# kind: pipeline
+# type: docker
+# name: lint
+# steps:
+  # - name: Lint Dockerfile
+    # image: hadolint/hadolint:latest-alpine
+    # pull: if-not-exists
+    # commands:
+      # - hadolint --version
+      # - hadolint Dockerfile*
 
-trigger:
-  branch:
-    - master
+# trigger:
+  # branch:
+    # - master
 
 #############
 ##TEST LINT##
 #############
+
 ---
 kind: pipeline
 type: docker
