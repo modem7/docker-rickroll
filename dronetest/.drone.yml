@@ -1,4 +1,7 @@
 ---
+########
+##LINT##
+########
 kind: pipeline
 type: docker
 name: lint
@@ -11,12 +14,12 @@ steps:
       - hadolint Dockerfile*
 
 trigger:
-  event:
-    - cron
-  cron:
-    - rickroll_latest
-    - rickroll_monthly
-    - rickroll_youtube
+  branch:
+    - master
+
+#############
+##TEST LINT##
+#############
 
 ---
 kind: pipeline
@@ -32,7 +35,85 @@ steps:
 
 trigger:
   branch:
-  - test
+    - test
+
+##########
+##LATEST##
+##########
+---
+kind: pipeline
+type: docker
+name: buildlatest
+
+# steps:
+  # - name: Build Latest
+    # image: plugins/docker
+    # settings:
+      # username:
+        # from_secret: docker_username
+      # password:
+        # from_secret: docker_password
+      # purge: true
+      # cache_from: "modem7/docker-rickroll:latest"
+      # compress: true
+      # repo: modem7/docker-rickroll
+      # tags: build
+    # use_cache: true
+
+  - name: build
+    image: docker
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - docker build -t foo:build
+
+# trigger:
+  # event:
+  # - cron
+  # cron:
+  # - rickroll_latest
+
+# depends_on:
+  # - lint
+
+---
+
+kind: pipeline
+type: docker
+name: testing
+
+steps:
+  # - name: Test Run
+    # image: modem7/docker-rickroll:build
+    # detach: true
+  
+  - name: Test Run
+    image: docker-rickroll:build
+    pull: if-not-exists
+    detach: true
+
+  - name: Pause
+    image: busybox:latest
+    commands:
+      - sleep 5
+
+  - name: Testing
+    image: docker-rickroll:build
+    commands:
+      - FILE=/usr/share/nginx/html/rickroll.mp4
+      - if [ -f "$FILE" ]; then
+      - echo "$FILE exists."
+      - exit 0
+      - else
+      - echo "$FILE does not exist."
+      - exit 1
+      - fi
+      - exit 78 # https://discourse.drone.io/t/how-to-exit-a-pipeline-early-without-failing/3951
+
+# depends_on:
+  # - buildlatest
+
 
 ---
 
@@ -61,25 +142,20 @@ steps:
       from_secret: docker_password
     tags: latest
 
-- name: slack
-  image: plugins/slack
-  settings:
-    webhook:
-      from_secret: slack_hook
-  when:
-    status: [ success, failure ]
-
 trigger:
   event:
-  - cron
+    - cron
   cron:
-  - rickroll_latest
+    - rickroll_latest
 
 depends_on:
   - lint
+  - buildlatet
 
+###########
+##MONTHLY##
+###########
 ---
-
 kind: pipeline
 type: docker
 name: monthly
@@ -105,25 +181,19 @@ steps:
       from_secret: docker_password
     tags: monthly
 
-- name: slack
-  image: plugins/slack
-  settings:
-    webhook:
-      from_secret: slack_hook
-  when:
-    status: [ success, failure ]
-
 trigger:
   event:
-  - cron
+    - cron
   cron:
-  - rickroll_monthly
+    - rickroll_monthly
 
 depends_on:
-  - lint
+    - lint
 
+###########
+##YOUTUBE##
+###########
 ---
-
 kind: pipeline
 type: docker
 name: Youtube
@@ -151,25 +221,19 @@ steps:
       from_secret: docker_password
     tags: youtube
 
-- name: slack
-  image: plugins/slack
-  settings:
-    webhook:
-      from_secret: slack_hook
-  when:
-    status: [ success, failure ]
-
 trigger:
   event:
-  - cron
+    - cron
   cron:
-  - rickroll_youtube
+    - rickroll_youtube
 
 depends_on:
   - lint
 
+########
+##TEST##
+########
 ---
-
 kind: pipeline
 type: docker
 name: test
@@ -199,7 +263,7 @@ steps:
 
 trigger:
   branch:
-  - test
+    - test
 
 depends_on:
   - linttest
