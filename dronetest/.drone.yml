@@ -1,0 +1,269 @@
+---
+########
+##LINT##
+########
+kind: pipeline
+type: docker
+name: lint
+steps:
+  - name: Lint Dockerfile
+    image: hadolint/hadolint:latest-alpine
+    pull: if-not-exists
+    commands:
+      - hadolint --version
+      - hadolint Dockerfile*
+
+trigger:
+  branch:
+    - master
+
+#############
+##TEST LINT##
+#############
+
+---
+kind: pipeline
+type: docker
+name: linttest
+steps:
+  - name: Lint Test Dockerfile
+    image: hadolint/hadolint:latest-alpine
+    pull: if-not-exists
+    commands:
+      - hadolint --version
+      - hadolint Dockerfile*
+
+trigger:
+  branch:
+    - test
+
+##########
+##LATEST##
+##########
+---
+kind: pipeline
+type: docker
+name: buildlatest
+
+# steps:
+  # - name: Build Latest
+    # image: plugins/docker
+    # settings:
+      # username:
+        # from_secret: docker_username
+      # password:
+        # from_secret: docker_password
+      # purge: true
+      # cache_from: "modem7/docker-rickroll:latest"
+      # compress: true
+      # repo: modem7/docker-rickroll
+      # tags: build
+    # use_cache: true
+
+  - name: build
+    image: docker
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - docker build -t foo:build
+
+# trigger:
+  # event:
+  # - cron
+  # cron:
+  # - rickroll_latest
+
+# depends_on:
+  # - lint
+
+---
+
+kind: pipeline
+type: docker
+name: testing
+
+steps:
+  # - name: Test Run
+    # image: modem7/docker-rickroll:build
+    # detach: true
+  
+  - name: Test Run
+    image: docker-rickroll:build
+    pull: if-not-exists
+    detach: true
+
+  - name: Pause
+    image: busybox:latest
+    commands:
+      - sleep 5
+
+  - name: Testing
+    image: docker-rickroll:build
+    commands:
+      - FILE=/usr/share/nginx/html/rickroll.mp4
+      - if [ -f "$FILE" ]; then
+      - echo "$FILE exists."
+      - exit 0
+      - else
+      - echo "$FILE does not exist."
+      - exit 1
+      - fi
+      - exit 78 # https://discourse.drone.io/t/how-to-exit-a-pipeline-early-without-failing/3951
+
+# depends_on:
+  # - buildlatest
+
+
+---
+
+kind: pipeline
+type: docker
+name: latest
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: latest  
+  image: thegeeklab/drone-docker-buildx
+  privileged: true
+  settings:
+    repo: modem7/docker-rickroll
+    purge: true
+    compress: true
+    use_cache: true
+    cache_from: "modem7/docker-rickroll:latest"
+    platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags: latest
+
+trigger:
+  event:
+    - cron
+  cron:
+    - rickroll_latest
+
+depends_on:
+  - lint
+  - buildlatet
+
+###########
+##MONTHLY##
+###########
+---
+kind: pipeline
+type: docker
+name: monthly
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: monthly  
+  image: thegeeklab/drone-docker-buildx
+  privileged: true
+  settings:
+    repo: modem7/docker-rickroll
+    purge: true
+    compress: true
+    use_cache: true
+    cache_from: "modem7/docker-rickroll:monthly"
+    platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags: monthly
+
+trigger:
+  event:
+    - cron
+  cron:
+    - rickroll_monthly
+
+depends_on:
+    - lint
+
+###########
+##YOUTUBE##
+###########
+---
+kind: pipeline
+type: docker
+name: Youtube
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: youtube  
+  image: thegeeklab/drone-docker-buildx
+  privileged: true
+  settings:
+    repo: modem7/docker-rickroll
+    purge: true
+    compress: true
+    use_cache: true
+    cache_from: "modem7/docker-rickroll:youtube"
+    platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8
+    dockerfile: youtube/Dockerfile
+    context: youtube/
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags: youtube
+
+trigger:
+  event:
+    - cron
+  cron:
+    - rickroll_youtube
+
+depends_on:
+  - lint
+
+########
+##TEST##
+########
+---
+kind: pipeline
+type: docker
+name: test
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: test build
+  image: thegeeklab/drone-docker-buildx
+  privileged: true
+  settings:
+    repo: modem7/docker-rickroll
+    purge: true
+    compress: true
+    use_cache: true
+    cache_from: "modem7/docker-rickroll:test"
+    platforms: linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64/v8
+    dockerfile: test/Dockerfile
+    context: test/
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags: test
+
+trigger:
+  branch:
+    - test
+
+depends_on:
+  - linttest
