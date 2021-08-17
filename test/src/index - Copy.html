@@ -6,7 +6,7 @@
 </head>
 <body>
 <div style="text-align: center;">
-  <video width="100%" loop preload poster="download.jpg" onclick="if (typeof InstallTrigger == 'undefined') (this.paused ? this.play() : this.pause());">
+  <video width="100%" loop controls="controls" preload poster="download.jpg" onclick="this.paused ? this.play() : this.pause();">
     <source src="/rickroll.mp4" type="video/mp4">
   </video>
 <style>
