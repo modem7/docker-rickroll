@@ -13,9 +13,11 @@ Image is based on Nginx stable alpine, and all the content is local to the conta
 # Tags
 :Latest is automatically built every month.
 
-:Test uses an onclick method with a poster image. Currently testing cross compatibility with multiple browsers.
+:Onclick is automatically built every month, uses an onclick method with a poster image.
 
 :Youtube is automatically built every month, and uses an iFrame to embed a Youtube Video.
+
+:Test same as onclick tag, currently testing cross compatibility with multiple browsers.
 
 # Configuration
 
