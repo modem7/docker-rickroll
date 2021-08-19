@@ -66,7 +66,7 @@ steps:
     tags: latest
 
 - name: slack
-  image: plugins/slack
+  image: themaz/drone-slack
   settings:
     webhook:
       from_secret: slack_hook
@@ -116,7 +116,7 @@ steps:
     tags: youtube
 
 - name: slack
-  image: plugins/slack
+  image: themaz/drone-slack
   settings:
     webhook:
       from_secret: slack_hook
@@ -166,7 +166,7 @@ steps:
     tags: onclick
 
 - name: slack
-  image: plugins/slack
+  image: themaz/drone-slack
   settings:
     webhook:
       from_secret: slack_hook
