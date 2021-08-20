@@ -327,11 +327,11 @@ steps:
   when:
     status: [ success, failure ]
 
-# trigger:
-  # event:
-  # - cron
-  # cron:
-  # - rickroll_4k
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_4k
 
 depends_on:
   - lint
@@ -377,11 +377,11 @@ steps:
   when:
     status: [ success, failure ]
 
-# trigger:
-  # event:
-  # - cron
-  # cron:
-  # - rickroll_4konclick
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_4konclick
 
 depends_on:
   - lint
