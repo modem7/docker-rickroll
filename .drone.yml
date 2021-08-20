@@ -17,6 +17,10 @@ trigger:
     - rickroll_latest
     - rickroll_youtube
     - rickroll_onclick
+    - rickroll_1080
+    - rickroll_1080onclick
+    - rickroll_4k
+    - rickroll_4konclick
 
 ---
 kind: pipeline
@@ -54,6 +58,7 @@ steps:
     compress: true
     use_cache: true
     cache_from: "modem7/docker-rickroll:latest"
+    dockerfile: SD/Dockerfile
     platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
       - linux/amd64
       - linux/arm/v6
@@ -82,6 +87,56 @@ trigger:
 depends_on:
   - lint
 
+---
+
+kind: pipeline
+type: docker
+name: Onclick
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: onclick  
+  image: thegeeklab/drone-docker-buildx
+  privileged: true
+  settings:
+    repo: modem7/docker-rickroll
+    purge: true
+    compress: true
+    use_cache: true
+    cache_from: "modem7/docker-rickroll:onclick"
+    platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
+      - linux/amd64
+      - linux/arm/v6
+      - linux/arm/v7
+      - linux/arm64/v8
+    dockerfile: SD/onclick/Dockerfile
+    # context: onclick/
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags: onclick
+
+- name: slack
+  image: themaz/drone-slack
+  settings:
+    webhook:
+      from_secret: slack_hook
+  when:
+    status: [ success, failure ]
+
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_onclick
+
+depends_on:
+  - lint
+  
 ---
 
 kind: pipeline
@@ -136,14 +191,14 @@ depends_on:
 
 kind: pipeline
 type: docker
-name: Onclick
+name: 1080
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: onclick  
+- name: 1080
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
@@ -151,19 +206,19 @@ steps:
     purge: true
     compress: true
     use_cache: true
-    cache_from: "modem7/docker-rickroll:onclick"
+    cache_from: "modem7/docker-rickroll:1080"
     platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
       - linux/amd64
       - linux/arm/v6
       - linux/arm/v7
       - linux/arm64/v8
-    dockerfile: onclick/Dockerfile
+    dockerfile: 1080/Dockerfile
     # context: onclick/
     username:
       from_secret: docker_username
     password:
       from_secret: docker_password
-    tags: onclick
+    tags: 1080
 
 - name: slack
   image: themaz/drone-slack
@@ -173,11 +228,161 @@ steps:
   when:
     status: [ success, failure ]
 
-# trigger:
-  # event:
-  # - cron
-  # cron:
-  # - rickroll_onclick
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_1080
+
+depends_on:
+  - lint
+
+---
+
+kind: pipeline
+type: docker
+name: 1080onclick
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: 1080onclick
+  image: thegeeklab/drone-docker-buildx
+  privileged: true
+  settings:
+    repo: modem7/docker-rickroll
+    purge: true
+    compress: true
+    use_cache: true
+    cache_from: "modem7/docker-rickroll:1080onclick"
+    platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
+      - linux/amd64
+      - linux/arm/v6
+      - linux/arm/v7
+      - linux/arm64/v8
+    dockerfile: 1080/onclick/Dockerfile
+    # context: onclick/
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags: 1080onclick
+
+- name: slack
+  image: themaz/drone-slack
+  settings:
+    webhook:
+      from_secret: slack_hook
+  when:
+    status: [ success, failure ]
+
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_1080onclick
+
+depends_on:
+  - lint
+
+---
+
+kind: pipeline
+type: docker
+name: 4k
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: 4k
+  image: thegeeklab/drone-docker-buildx
+  privileged: true
+  settings:
+    repo: modem7/docker-rickroll
+    purge: true
+    compress: true
+    use_cache: true
+    cache_from: "modem7/docker-rickroll:4k"
+    platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
+      - linux/amd64
+      - linux/arm/v6
+      - linux/arm/v7
+      - linux/arm64/v8
+    dockerfile: 4k/Dockerfile
+    # context: onclick/
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags: 4k
+
+- name: slack
+  image: themaz/drone-slack
+  settings:
+    webhook:
+      from_secret: slack_hook
+  when:
+    status: [ success, failure ]
+
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_4k
+
+depends_on:
+  - lint
+
+---
+
+kind: pipeline
+type: docker
+name: 4konclick
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: 4konclick
+  image: thegeeklab/drone-docker-buildx
+  privileged: true
+  settings:
+    repo: modem7/docker-rickroll
+    purge: true
+    compress: true
+    use_cache: true
+    cache_from: "modem7/docker-rickroll:4konclick"
+    platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
+      - linux/amd64
+      - linux/arm/v6
+      - linux/arm/v7
+      - linux/arm64/v8
+    dockerfile: 4k/onclick/Dockerfile
+    # context: onclick/
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags: 4konclick
+
+- name: slack
+  image: themaz/drone-slack
+  settings:
+    webhook:
+      from_secret: slack_hook
+  when:
+    status: [ success, failure ]
+
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_4konclick
 
 depends_on:
   - lint
@@ -221,43 +426,3 @@ trigger:
 
 depends_on:
   - linttest
-
-# ---
-
-# kind: pipeline
-# type: docker
-# name: test-4k
-
-# platform:
-  # os: linux
-  # arch: amd64
-
-# steps:
-# - name: test build
-  # image: thegeeklab/drone-docker-buildx
-  # privileged: true
-  # settings:
-    # repo: modem7/docker-rickroll
-    # purge: true
-    # compress: true
-    # # use_cache: true
-    # # cache_from: "modem7/docker-rickroll:test"
-    # platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
-      # - linux/amd64
-      # # - linux/arm/v6
-      # # - linux/arm/v7
-      # # - linux/arm64/v8
-    # dockerfile: test/4k-onclick/Dockerfile
-    # # context: test/
-    # username:
-      # from_secret: docker_username
-    # password:
-      # from_secret: docker_password
-    # tags: test-4konclick
-
-# trigger:
-  # branch:
-  # - test
-
-# depends_on:
-  # - linttest
