@@ -1,6 +1,6 @@
 # Self Hosted, self contained Rickroll container.
 
-![Docker Pulls](https://img.shields.io/docker/pulls/modem7/docker-rickroll) ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/latest?label=latest%2Fonclick) ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/1080?label=1080%2F1080onclick) ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/4k?label=4k%2F4konclick) ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/youtube?label=Youtube) [![Build Status](https://drone.modem7.com/api/badges/modem7/docker-rickroll/status.svg)](https://drone.modem7.com/modem7/docker-rickroll)
+![Docker Pulls](https://img.shields.io/docker/pulls/modem7/docker-rickroll) ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/latest?label=latest%2Fonclick) ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/1080?label=1080%2F1080onclick) ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/4k?label=4k%2F4konclick) ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/youtube?label=youtube) [![Build Status](https://drone.modem7.com/api/badges/modem7/docker-rickroll/status.svg)](https://drone.modem7.com/modem7/docker-rickroll)
 
 More info can be found here: https://www.youtube.com/watch?v=dQw4w9WgXcQ
 
