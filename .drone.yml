@@ -193,7 +193,7 @@ platform:
   arch: amd64
 
 steps:
-- name: onclick  
+- name: 4k  
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
@@ -243,7 +243,7 @@ platform:
   arch: amd64
 
 steps:
-- name: onclick  
+- name: 4k-onclick  
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
@@ -257,8 +257,8 @@ steps:
       - linux/arm/v6
       - linux/arm/v7
       - linux/arm64/v8
-    dockerfile: 4k-onclick/Dockerfile
-    context: 4k-onclick/
+    dockerfile: 4k/4k-onclick/Dockerfile
+    context: 4k/4k-onclick/
     username:
       from_secret: docker_username
     password:
