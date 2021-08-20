@@ -1,8 +1,8 @@
 FROM nginx:stable-alpine as build-stage
 
-COPY onclick/src/ /usr/share/nginx/html/
+COPY src/ /usr/share/nginx/html/
 COPY MP4/SD/rickroll.mp4 /usr/share/nginx/html/rickroll.mp4
-COPY onclick/conf/nginx-site.conf /etc/nginx/conf.d/default.conf
+COPY conf/nginx-site.conf /etc/nginx/conf.d/default.conf
 
 FROM nginx:stable-alpine
 COPY --from=build-stage /usr/share/nginx/html/ /usr/share/nginx/html/
