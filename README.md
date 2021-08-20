@@ -23,6 +23,14 @@ Image is based on Nginx stable alpine, and all the content is local to the conta
 
 :Test same as onclick tag, currently testing cross compatibility with multiple browsers.
 
+| Tag | Description |
+| :----: | --- |
+| Latest | automatically built every month. Video starts automatically, but muted. SD Quality. |
+| Youtube | automatically built every month, uses an onclick method with a poster image. SD Quality. |
+| 1080 | automatically built every month, and uses an iFrame to embed a Youtube Video. SD Quality. |
+| 4k | automatically built every month and are 1080p AI remasters of the above tags |
+| Test | automatically built every month and are 4k AI remasters of the above tags |
+
 # Configuration
 
 ```bash
