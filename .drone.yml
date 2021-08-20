@@ -173,11 +173,11 @@ steps:
   when:
     status: [ success, failure ]
 
-trigger:
-  event:
-  - cron
-  cron:
-  - rickroll_onclick
+# trigger:
+  # event:
+  # - cron
+  # cron:
+  # - rickroll_onclick
 
 depends_on:
   - lint
