@@ -236,7 +236,7 @@ depends_on:
 
 kind: pipeline
 type: docker
-name: 1080
+name: 1080onclick
 
 platform:
   os: linux
