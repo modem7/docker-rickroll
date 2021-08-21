@@ -436,6 +436,7 @@ depends_on:
 
 kind: pipeline
 type: docker
+<<<<<<< HEAD
 name: 4k
 
 platform:
@@ -536,6 +537,8 @@ depends_on:
 
 kind: pipeline
 type: docker
+=======
+>>>>>>> a95ccf4 (removed 4k version due to size)
 name: test
 
 platform:
