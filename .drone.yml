@@ -10,20 +10,17 @@ steps:
       - hadolint --version
       - hadolint Dockerfile*
 
-clone:
-  depth: 1
-
-# trigger:
-  # event:
-    # - cron
-  # cron:
-    # - rickroll_latest
-    # - rickroll_youtube
-    # - rickroll_onclick
-    # - rickroll_1080
-    # - rickroll_1080onclick
-    # - rickroll_4k
-    # - rickroll_4konclick
+trigger:
+  event:
+    - cron
+  cron:
+    - rickroll_latest
+    - rickroll_youtube
+    - rickroll_onclick
+    - rickroll_1080
+    - rickroll_1080onclick
+    - rickroll_4k
+    - rickroll_4konclick
 
 ---
 kind: pipeline
