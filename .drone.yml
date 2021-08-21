@@ -398,7 +398,7 @@ steps:
   pull: if-not-exists
   commands:
     - hadolint --version
-    - hadolint ./test/onclick/Dockerfile*
+    - hadolint ./test/Dockerfile*
 
 steps:
 - name: test build
