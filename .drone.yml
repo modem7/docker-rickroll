@@ -27,7 +27,7 @@ steps:
     pull: if-not-exists
     commands:
       - hadolint --version
-      - hadolint Dockerfile*
+      - hadolint ./Dockerfile*
 
 # trigger:
   # event:
