@@ -49,11 +49,11 @@ steps:
   when:
     status: [ success, failure ]
 
-# trigger:
-  # event:
-  # - cron
-  # cron:
-  # - rickroll_latest
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_latest
 
 ---
 
