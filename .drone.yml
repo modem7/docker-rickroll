@@ -1,7 +1,21 @@
 ---
 kind: pipeline
 type: docker
+name: custom-clone-operation
+
+clone:
+  disable: true
+
+steps:
+  - name: clone
+    image: alpine/git
+    commands:
+    # - git clone https://$DRONE_GIT_USERNAME:$DRONE_GIT_PASSWORD@$REPO .
+      - git clone https://modem7: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@@docker-rickroll .
+
 name: lint
+clone:
+  disable: true
 steps:
   - name: Lint Dockerfile
     image: hadolint/hadolint:latest-alpine
@@ -10,17 +24,17 @@ steps:
       - hadolint --version
       - hadolint Dockerfile*
 
-trigger:
-  event:
-    - cron
-  cron:
-    - rickroll_latest
-    - rickroll_youtube
-    - rickroll_onclick
-    - rickroll_1080
-    - rickroll_1080onclick
-    - rickroll_4k
-    - rickroll_4konclick
+# trigger:
+  # event:
+    # - cron
+  # cron:
+    # - rickroll_latest
+    # - rickroll_youtube
+    # - rickroll_onclick
+    # - rickroll_1080
+    # - rickroll_1080onclick
+    # - rickroll_4k
+    # - rickroll_4konclick
 
 ---
 kind: pipeline
