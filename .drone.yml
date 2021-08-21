@@ -13,11 +13,10 @@ steps:
     # - git clone https://$DRONE_GIT_USERNAME:$DRONE_GIT_PASSWORD@$REPO .
       - git clone https://modem7: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@@docker-rickroll .
 
-name: lint
-clone:
-  disable: true
 steps:
   - name: Lint Dockerfile
+    clone:
+      disable: true
     image: hadolint/hadolint:latest-alpine
     pull: if-not-exists
     commands:
