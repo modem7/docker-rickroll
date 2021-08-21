@@ -9,20 +9,18 @@ steps:
     commands:
       - hadolint --version
       - hadolint Dockerfile*
-    environment:
-      GIT_LFS_SKIP_SMUDGE: "1"
 
-# trigger:
-  # event:
-    # - cron
-  # cron:
-    # - rickroll_latest
-    # - rickroll_youtube
-    # - rickroll_onclick
-    # - rickroll_1080
-    # - rickroll_1080onclick
-    # - rickroll_4k
-    # - rickroll_4konclick
+trigger:
+  event:
+    - cron
+  cron:
+    - rickroll_latest
+    - rickroll_youtube
+    - rickroll_onclick
+    - rickroll_1080
+    - rickroll_1080onclick
+    - rickroll_4k
+    - rickroll_4konclick
 
 ---
 kind: pipeline
