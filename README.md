@@ -17,7 +17,7 @@ Image is based on Nginx stable alpine, and all the content is local to the conta
 | Onclick | Automatically built every month, uses an onclick method with a poster image. SD Quality. |
 | Youtube | Automatically built every month, and uses an iFrame to embed a Youtube Video. SD Quality. |
 | 1080/1080onclick | Automatically built every month and are 1080p AI remasters of the above tags. |
-| 4k/4konclick | Automatically built every month and are 4K AI remasters of the above tags |
+| 4k/4konclick | Automatically built every month and are 4K AI remasters of the above tags. |
 | Test | Same as onclick tag, currently testing cross compatibility with multiple browsers. |
 
 # Configuration
