@@ -1,33 +1,16 @@
 ---
 kind: pipeline
 type: docker
-name: custom-clone-operation
-
-clone:
-  disable: true
-
-steps:
-- name: clone
-  image: alpine/git
-  commands:
-    - git clone https://modem7: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@github.com/modem7/docker-rickroll .
-  # - git clone https://$DRONE_GIT_USERNAME:$DRONE_GIT_PASSWORD@$REPO .
-
----
-kind: pipeline
-type: docker
 name: lint
-
-clone:
-  disable: true
-
 steps:
   - name: Lint Dockerfile
     image: hadolint/hadolint:latest-alpine
     pull: if-not-exists
     commands:
       - hadolint --version
-      - hadolint ./Dockerfile*
+      - hadolint Dockerfile*
+    environment:
+      GIT_LFS_SKIP_SMUDGE: "1"
 
 # trigger:
   # event:
