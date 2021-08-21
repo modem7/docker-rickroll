@@ -8,6 +8,9 @@ platform:
   os: linux
   arch: amd64
 
+clone:
+  depth: 1
+
 steps:
 - name: Lint Dockerfile
   image: hadolint/hadolint:latest-alpine
