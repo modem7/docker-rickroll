@@ -16,7 +16,6 @@ steps:
     - hadolint --version
     - hadolint ./SD/piholeunbound/Dockerfile*
 
-steps:
 - name: latest  
   image: thegeeklab/drone-docker-buildx
   privileged: true
@@ -71,7 +70,6 @@ steps:
     - hadolint --version
     - hadolint ./SD/onclick/Dockerfile*
 
-steps:
 - name: onclick  
   image: thegeeklab/drone-docker-buildx
   privileged: true
@@ -127,7 +125,6 @@ steps:
     - hadolint --version
     - hadolint ./youtube/Dockerfile*
 
-steps:
 - name: youtube  
   image: thegeeklab/drone-docker-buildx
   privileged: true
@@ -183,7 +180,6 @@ steps:
     - hadolint --version
     - hadolint ./1080/Dockerfile*
 
-steps:
 - name: 1080
   image: thegeeklab/drone-docker-buildx
   privileged: true
@@ -239,7 +235,6 @@ steps:
     - hadolint --version
     - hadolint ./1080/onclick/Dockerfile*
 
-steps:
 - name: 1080onclick
   image: thegeeklab/drone-docker-buildx
   privileged: true
@@ -295,7 +290,6 @@ steps:
     - hadolint --version
     - hadolint ./4k/Dockerfile*
 
-steps:
 - name: 4k
   image: thegeeklab/drone-docker-buildx
   privileged: true
@@ -351,7 +345,6 @@ steps:
     - hadolint --version
     - hadolint ./4k/onclick/Dockerfile*
 
-steps:
 - name: 4konclick
   image: thegeeklab/drone-docker-buildx
   privileged: true
@@ -407,7 +400,6 @@ steps:
     - hadolint --version
     - hadolint ./test/Dockerfile*
 
-steps:
 - name: test build
   image: thegeeklab/drone-docker-buildx
   privileged: true
@@ -423,7 +415,7 @@ steps:
       # - linux/arm/v7
       # - linux/arm64/v8
     dockerfile: test/Dockerfile
-    context: test/
+    # context: test/
     username:
       from_secret: docker_username
     password:
@@ -433,6 +425,3 @@ steps:
 trigger:
   branch:
   - test
-
-depends_on:
-  - linttest
