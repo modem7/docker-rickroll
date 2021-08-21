@@ -11,7 +11,7 @@ steps:
       - hadolint Dockerfile*
 
 clone:
-  depth: 50
+  depth: 1
 
 # trigger:
   # event:
