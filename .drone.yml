@@ -14,7 +14,7 @@ steps:
   pull: if-not-exists
   commands:
     - hadolint --version
-    - hadolint ./SD/piholeunbound/Dockerfile*
+    - hadolint ./SD/Dockerfile*
 
 - name: latest  
   image: thegeeklab/drone-docker-buildx
