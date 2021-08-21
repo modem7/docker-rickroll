@@ -1,44 +1,4 @@
 ---
-kind: pipeline
-type: docker
-name: lint
-steps:
-  - name: Lint Dockerfile
-    image: hadolint/hadolint:latest-alpine
-    pull: if-not-exists
-    commands:
-      - hadolint --version
-      - hadolint Dockerfile*
-
-trigger:
-  event:
-    - cron
-  cron:
-    - rickroll_latest
-    - rickroll_youtube
-    - rickroll_onclick
-    - rickroll_1080
-    - rickroll_1080onclick
-    - rickroll_4k
-    - rickroll_4konclick
-
----
-kind: pipeline
-type: docker
-name: linttest
-steps:
-  - name: Lint Test Dockerfile
-    image: hadolint/hadolint:latest-alpine
-    pull: if-not-exists
-    commands:
-      - hadolint --version
-      - hadolint Dockerfile*
-
-trigger:
-  branch:
-  - test
-
----
 
 kind: pipeline
 type: docker
@@ -47,6 +7,14 @@ name: latest
 platform:
   os: linux
   arch: amd64
+
+steps:
+- name: Lint Dockerfile
+  image: hadolint/hadolint:latest-alpine
+  pull: if-not-exists
+  commands:
+    - hadolint --version
+    - hadolint ./SD/piholeunbound/Dockerfile*
 
 steps:
 - name: latest  
@@ -84,9 +52,6 @@ trigger:
   cron:
   - rickroll_latest
 
-depends_on:
-  - lint
-
 ---
 
 kind: pipeline
@@ -96,6 +61,14 @@ name: Onclick
 platform:
   os: linux
   arch: amd64
+
+steps:
+- name: Lint Dockerfile
+  image: hadolint/hadolint:latest-alpine
+  pull: if-not-exists
+  commands:
+    - hadolint --version
+    - hadolint ./SD/onclick/Dockerfile*
 
 steps:
 - name: onclick  
@@ -134,9 +107,6 @@ trigger:
   cron:
   - rickroll_onclick
 
-depends_on:
-  - lint
-  
 ---
 
 kind: pipeline
@@ -146,6 +116,14 @@ name: Youtube
 platform:
   os: linux
   arch: amd64
+
+steps:
+- name: Lint Dockerfile
+  image: hadolint/hadolint:latest-alpine
+  pull: if-not-exists
+  commands:
+    - hadolint --version
+    - hadolint ./youtube/Dockerfile*
 
 steps:
 - name: youtube  
@@ -184,9 +162,6 @@ trigger:
   cron:
   - rickroll_youtube
 
-depends_on:
-  - lint
-
 ---
 
 kind: pipeline
@@ -196,6 +171,14 @@ name: 1080
 platform:
   os: linux
   arch: amd64
+
+steps:
+- name: Lint Dockerfile
+  image: hadolint/hadolint:latest-alpine
+  pull: if-not-exists
+  commands:
+    - hadolint --version
+    - hadolint ./1080/Dockerfile*
 
 steps:
 - name: 1080
@@ -234,9 +217,6 @@ trigger:
   cron:
   - rickroll_1080
 
-depends_on:
-  - lint
-
 ---
 
 kind: pipeline
@@ -246,6 +226,14 @@ name: 1080onclick
 platform:
   os: linux
   arch: amd64
+
+steps:
+- name: Lint Dockerfile
+  image: hadolint/hadolint:latest-alpine
+  pull: if-not-exists
+  commands:
+    - hadolint --version
+    - hadolint ./1080/onclick/Dockerfile*
 
 steps:
 - name: 1080onclick
@@ -284,9 +272,6 @@ trigger:
   cron:
   - rickroll_1080onclick
 
-depends_on:
-  - lint
-
 ---
 
 kind: pipeline
@@ -296,6 +281,14 @@ name: 4k
 platform:
   os: linux
   arch: amd64
+
+steps:
+- name: Lint Dockerfile
+  image: hadolint/hadolint:latest-alpine
+  pull: if-not-exists
+  commands:
+    - hadolint --version
+    - hadolint ./4k/Dockerfile*
 
 steps:
 - name: 4k
@@ -334,9 +327,6 @@ trigger:
   cron:
   - rickroll_4k
 
-depends_on:
-  - lint
-
 ---
 
 kind: pipeline
@@ -346,6 +336,14 @@ name: 4konclick
 platform:
   os: linux
   arch: amd64
+
+steps:
+- name: Lint Dockerfile
+  image: hadolint/hadolint:latest-alpine
+  pull: if-not-exists
+  commands:
+    - hadolint --version
+    - hadolint ./4k/onclick/Dockerfile*
 
 steps:
 - name: 4konclick
@@ -384,9 +382,6 @@ trigger:
   cron:
   - rickroll_4konclick
 
-depends_on:
-  - lint
-
 ---
 
 kind: pipeline
@@ -396,6 +391,14 @@ name: test
 platform:
   os: linux
   arch: amd64
+
+steps:
+- name: Lint Dockerfile
+  image: hadolint/hadolint:latest-alpine
+  pull: if-not-exists
+  commands:
+    - hadolint --version
+    - hadolint ./test/onclick/Dockerfile*
 
 steps:
 - name: test build
