@@ -10,7 +10,7 @@ steps:
 - name: clone
   image: alpine/git
   commands:
-    - git clone https://modem7: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@@docker-rickroll .
+    - git clone https://modem7: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@docker-rickroll .
   # - git clone https://$DRONE_GIT_USERNAME:$DRONE_GIT_PASSWORD@$REPO .
 
 ---
