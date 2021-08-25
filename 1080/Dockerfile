@@ -1,7 +1,5 @@
 FROM nginx:mainline-alpine as build-stage
 
-apt-get install balh
-
 COPY 1080/src/ /usr/share/nginx/html/
 COPY MP4/1080/rickroll.mp4 /usr/share/nginx/html/rickroll.mp4
 COPY 1080/conf/nginx-site.conf /etc/nginx/conf.d/default.conf
