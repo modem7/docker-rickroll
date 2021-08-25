@@ -170,11 +170,10 @@ trigger:
   - rickroll_monthly_build
 
 ---
----
 
 kind: pipeline
 type: docker
-name: latest
+name: test
 
 platform:
   os: linux
@@ -184,7 +183,7 @@ clone:
   depth: 1
 
 steps:
-- name: 1080game
+- name: 1080gametest
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
