@@ -172,7 +172,7 @@ trigger:
 
 kind: pipeline
 type: docker
-name: latest
+name: thegame
 
 platform:
   os: linux
