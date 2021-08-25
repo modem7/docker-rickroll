@@ -17,9 +17,9 @@ steps:
   pull: if-not-exists
   commands:
     - hadolint --version
-    - hadolint ./SD/Dockerfile*
+    - hadolint */Dockerfile
 
-- name: latest  
+- name: SDlatest  
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
@@ -41,7 +41,7 @@ steps:
       from_secret: docker_password
     tags: latest
 
-- name: onclick  
+- name: SDonclick  
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
@@ -162,3 +162,9 @@ steps:
       from_secret: slack_hook
   when:
     status: [ success, failure ]
+
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_monthly_build
