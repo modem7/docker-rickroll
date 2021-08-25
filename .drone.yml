@@ -179,9 +179,6 @@ platform:
   os: linux
   arch: amd64
 
-clone:
-  depth: 1
-
 steps:
 - name: 1080gametest
   image: thegeeklab/drone-docker-buildx
