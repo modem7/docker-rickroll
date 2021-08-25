@@ -148,7 +148,6 @@ steps:
       - linux/arm/v7
       - linux/arm64/v8
     dockerfile: 1080game/Dockerfile
-    # context: onclick/
     username:
       from_secret: docker_username
     password:
