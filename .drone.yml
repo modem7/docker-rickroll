@@ -49,11 +49,11 @@ steps:
   when:
     status: [ success, failure ]
 
-trigger:
-  event:
-  - cron
-  cron:
-  - rickroll_latest
+# trigger:
+  # event:
+  # - cron
+  # cron:
+  # - rickroll_latest
 
 ---
 
@@ -104,11 +104,11 @@ steps:
   when:
     status: [ success, failure ]
 
-trigger:
-  event:
-  - cron
-  cron:
-  - rickroll_onclick
+# trigger:
+  # event:
+  # - cron
+  # cron:
+  # - rickroll_onclick
 
 ---
 
@@ -159,11 +159,11 @@ steps:
   when:
     status: [ success, failure ]
 
-trigger:
-  event:
-  - cron
-  cron:
-  - rickroll_youtube
+# trigger:
+  # event:
+  # - cron
+  # cron:
+  # - rickroll_youtube
 
 ---
 
@@ -214,11 +214,11 @@ steps:
   when:
     status: [ success, failure ]
 
-trigger:
-  event:
-  - cron
-  cron:
-  - rickroll_1080
+# trigger:
+  # event:
+  # - cron
+  # cron:
+  # - rickroll_1080
 
 ---
 
@@ -269,11 +269,11 @@ steps:
   when:
     status: [ success, failure ]
 
-trigger:
-  event:
-  - cron
-  cron:
-  - rickroll_1080onclick
+# trigger:
+  # event:
+  # - cron
+  # cron:
+  # - rickroll_1080onclick
 
 ---
 
@@ -367,6 +367,6 @@ steps:
   when:
     status: [ success, failure ]
 
-trigger:
-  event:
-  - custom
+# trigger:
+  # event:
+  # - custom
