@@ -1,4 +1,4 @@
-FROM nginx:stable-alpine
+FROM nginx:mainline-alpine
 
 COPY src/ /usr/share/nginx/html/
 COPY conf/nginx-site.conf /etc/nginx/conf.d/default.conf
