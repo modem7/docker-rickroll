@@ -162,8 +162,9 @@ steps:
   when:
     status: [ success, failure ]
 
-# trigger:
-  # event:
-  # - cron
-  # cron:
-  # - rickroll_monthly_build
+trigger:
+  event:
+  - cron
+  - custom
+  cron:
+  - rickroll_monthly_build
