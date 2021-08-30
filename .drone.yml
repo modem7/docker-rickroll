@@ -163,7 +163,7 @@ steps:
       - linux/arm/v6
       - linux/arm/v7
       - linux/arm64/v8
-    dockerfile: 4k/onclick/onclick/Dockerfile
+    dockerfile: 4k/onclick/Dockerfile
     # context: onclick/
     username:
       from_secret: docker_username
