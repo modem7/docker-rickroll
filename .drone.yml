@@ -154,6 +154,7 @@ steps:
       from_secret: docker_password
     tags: 1080game
 
+<<<<<<< HEAD
 - name: 4k
   image: thegeeklab/drone-docker-buildx
   privileged: true
@@ -198,6 +199,8 @@ steps:
       from_secret: docker_password
     tags: 4konclick
 
+=======
+>>>>>>> parent of 5193749 (re-added 4k version)
 - name: slack
   image: themaz/drone-slack
   settings:
