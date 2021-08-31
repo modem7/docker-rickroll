@@ -160,5 +160,6 @@ steps:
 trigger:
   event:
   - cron
+  - custom
   cron:
   - rickroll_monthly_build
