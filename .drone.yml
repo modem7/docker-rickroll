@@ -183,8 +183,12 @@ steps:
   # event:
   # - cron
   # cron:
+<<<<<<< HEAD
   # - rickroll_monthly_build
 
 trigger:
   event:
     - custom
+=======
+  # - rickroll_monthly_build
+>>>>>>> e80c532 (update 1080 video to lower size)
