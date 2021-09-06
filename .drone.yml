@@ -17,11 +17,6 @@ steps:
   pull: if-not-exists
   commands:
     - hadolint --version
-<<<<<<< HEAD
-    - hadolint ./test/Dockerfile*
-
-- name: test
-=======
     - hadolint */Dockerfile
 
 - name: SDlatest  
@@ -90,7 +85,6 @@ steps:
     tags: youtube
 
 - name: 1080
->>>>>>> parent of 4cedabb (testing)
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
@@ -161,14 +155,10 @@ steps:
     webhook:
       from_secret: slack_hook
   when:
-<<<<<<< HEAD
-    status: [ success, failure ]
-=======
     status: [ success, failure ]
 
-# trigger:
-  # event:
-  # - cron
-  # cron:
-  # - rickroll_monthly_build
->>>>>>> parent of 4cedabb (testing)
+trigger:
+  event:
+  - cron
+  cron:
+  - rickroll_monthly_build
