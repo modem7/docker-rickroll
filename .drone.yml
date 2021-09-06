@@ -14,9 +14,9 @@ steps:
   pull: if-not-exists
   commands:
     - hadolint --version
-    - hadolint ./1080game/Dockerfile*
+    - hadolint ./test/Dockerfile*
 
-- name: 1080game
+- name: test
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
@@ -45,7 +45,3 @@ steps:
       from_secret: slack_hook
   when:
     status: [ success, failure ]
-
-trigger:
-  event:
-  - custom
