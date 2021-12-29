@@ -17,10 +17,10 @@ Image is based on Nginx stable alpine, and all the content is local to the conta
 # Tags
 | Tag | Description |
 | :----: | --- |
-| Latest | Automatically built every month. Video starts automatically, but muted. SD Quality. |
-| Onclick | Automatically built every month. Uses an onclick method with a poster image. SD Quality. |
-| Youtube | Automatically built every month. Uses an iFrame to embed a Youtube Video. SD Quality. |
-| 1080/1080onclick | Automatically built every month. 1080p AI remasters of the above tags. |
+| Latest | Video starts automatically, but muted. SD Quality. |
+| Onclick | Uses an onclick method with a poster image. SD Quality. |
+| Youtube | Uses an iFrame to embed a Youtube Video. SD Quality. |
+| 1080/1080onclick | 1080p AI remasters of the above tags. |
 
 # Configuration
 
