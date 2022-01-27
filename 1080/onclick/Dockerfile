@@ -1,4 +1,4 @@
-FROM nginx:1-alpine as build-stage
+FROM nginx:1.21.5-alpine as build-stage
 
 COPY 1080/onclick/src/ /usr/share/nginx/html/
 COPY MP4/1080/rickroll.mp4 /usr/share/nginx/html/rickroll.mp4
