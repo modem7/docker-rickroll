@@ -46,3 +46,11 @@ updates:
       interval: "daily"
     assignees:
       - "modem7"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      # Check for updates to GitHub Actions every weekday
+      interval: "daily"
+    assignees:
+      - "modem7"
