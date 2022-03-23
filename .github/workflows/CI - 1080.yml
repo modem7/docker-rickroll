@@ -1,0 +1,29 @@
+name: Docker CI - 1080
+
+on:
+  push:
+    paths:
+      - 1080/Dockerfile
+  pull_request:
+    paths:
+      - 1080/Dockerfile
+  workflow_dispatch:
+
+jobs:
+   build:
+    runs-on: ubuntu-latest
+    name: Set up Docker
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: 1080/Dockerfile
+          pull: false
+          push: false
