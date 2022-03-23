@@ -1,12 +1,12 @@
-name: Docker CI - 1080
+name: Docker CI - youtube
 
 on:
   push:
     paths:
-      - 1080/Dockerfile
+      - base-fullbuild/Dockerfile
   pull_request:
     paths:
-      - 1080/Dockerfile
+      - base-fullbuild/Dockerfile
   workflow_dispatch:
 
 jobs:
@@ -24,6 +24,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: 1080/Dockerfile
+          file: youtube/Dockerfile
           pull: false
           push: false
