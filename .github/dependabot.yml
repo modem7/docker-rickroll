@@ -9,48 +9,68 @@ updates:
     directory: "/1080" # Location of package manifests
     schedule:
       interval: "daily"
+      timezone: "Europe/London"
     assignees:
       - "modem7"
+    labels:
+      - "dependencies"
 
   - package-ecosystem: "docker" # See documentation for possible values
     directory: "/1080/onclick" # Location of package manifests
     schedule:
       interval: "daily"
+      timezone: "Europe/London"
     assignees:
       - "modem7"
+    labels:
+      - "dependencies"
 
   - package-ecosystem: "docker" # See documentation for possible values
     directory: "/SD" # Location of package manifests
     schedule:
       interval: "daily"
+      timezone: "Europe/London"
     assignees:
       - "modem7"
+    labels:
+      - "dependencies"
 
   - package-ecosystem: "docker" # See documentation for possible values
     directory: "/SD/onclick" # Location of package manifests
     schedule:
       interval: "daily"
+      timezone: "Europe/London"
     assignees:
       - "modem7"
+    labels:
+      - "dependencies"
 
   - package-ecosystem: "docker" # See documentation for possible values
     directory: "/thegame" # Location of package manifests
     schedule:
       interval: "daily"
+      timezone: "Europe/London"
     assignees:
       - "modem7"
+    labels:
+      - "dependencies"
 
   - package-ecosystem: "docker" # See documentation for possible values
     directory: "/youtube" # Location of package manifests
     schedule:
       interval: "daily"
+      timezone: "Europe/London"
     assignees:
       - "modem7"
+    labels:
+      - "dependencies"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      # Check for updates to GitHub Actions every weekday
       interval: "daily"
+      timezone: "Europe/London"
     assignees:
       - "modem7"
+    labels:
+      - "dependencies"
