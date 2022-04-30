@@ -24,7 +24,6 @@ Please update your files accordingly.
 | :----: | --- |
 | Latest | Video starts automatically, but muted. SD Quality. |
 | Onclick | Uses an onclick method with a poster image. SD Quality. |
-| Youtube | Uses an iFrame to embed a Youtube Video. SD Quality. |
 | 1080/1080onclick | 1080p AI remasters of the above tags. |
 
 # Configuration
