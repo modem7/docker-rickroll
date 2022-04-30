@@ -185,7 +185,6 @@ steps:
       - linux/arm/v7
       - linux/arm64/v8
     dockerfile: youtube/Dockerfile
-    context: youtube/
     username:
       from_secret: docker_username
     password:
