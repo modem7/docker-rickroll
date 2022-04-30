@@ -9,11 +9,15 @@
 
 More info can be found here: https://www.youtube.com/watch?v=dQw4w9WgXcQ
 
-Image is based on Nginx stable alpine, and all the content is local to the container (bar for the Youtube tag).
+Image is based on nginxinc/nginx-unprivileged, and all the content is local to the container (bar for the Youtube tag).
 
 # Container Screenshot
 
 ![Capture](https://user-images.githubusercontent.com/4349962/128193774-d5c98641-56d7-471f-bc69-1d0d952a0d60.png)
+
+# Breaking change
+Due to changing the image to nginxinc/nginx-unprivileged, the ports have changed from `80` to `8080`. 
+Please update your files accordingly. 
 
 # Tags
 | Tag | Description |
@@ -34,5 +38,5 @@ services:
     image: modem7/docker-rickroll
     container_name: Rickroll
     ports:
-      - 80:80
+      - 8080:8080
 ```
