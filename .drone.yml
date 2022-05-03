@@ -1,47 +1,4 @@
 ---
-<<<<<<< HEAD
-=======
-kind: pipeline
-type: docker
-name: lint
-steps:
-  - name: Lint Dockerfile
-    image: hadolint/hadolint:latest-alpine
-    pull: if-not-exists
-    commands:
-      - hadolint --version
-      - hadolint Dockerfile*
-
-trigger:
-  event:
-    - cron
-  cron:
-    - rickroll_latest
-    - rickroll_youtube
-    - rickroll_onclick
-    - rickroll_1080
-    - rickroll_1080onclick
-    - rickroll_4k
-    - rickroll_4konclick
-
----
-kind: pipeline
-type: docker
-name: linttest
-steps:
-  - name: Lint Test Dockerfile
-    image: hadolint/hadolint:latest-alpine
-    pull: if-not-exists
-    commands:
-      - hadolint --version
-      - hadolint Dockerfile*
-
-trigger:
-  branch:
-  - test
-
----
->>>>>>> 806c46a (rewriting everything)
 
 kind: pipeline
 type: docker
@@ -69,6 +26,7 @@ steps:
     repo: modem7/docker-rickroll
     purge: true
     compress: true
+    squash: true
     use_cache: true
     cache_from: "modem7/docker-rickroll:latest"
     dockerfile: SD/Dockerfile
@@ -83,41 +41,7 @@ steps:
       from_secret: docker_password
     tags: latest
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 - name: SDonclick  
-=======
-- name: slack
-  image: themaz/drone-slack
-  settings:
-    webhook:
-      from_secret: slack_hook
-  when:
-    status: [ success, failure ]
-
-trigger:
-  event:
-  - cron
-  cron:
-  - rickroll_latest
-
-depends_on:
-  - lint
-
----
-
-kind: pipeline
-type: docker
-name: Onclick
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-=======
->>>>>>> e9aa05d (changing base image to address sec concerns)
-- name: onclick  
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
@@ -125,6 +49,7 @@ steps:
     purge: true
     compress: true
     use_cache: true
+    squash: true
     cache_from: "modem7/docker-rickroll:onclick"
     platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
       - linux/amd64
@@ -139,116 +64,6 @@ steps:
       from_secret: docker_password
     tags: onclick
 
-<<<<<<< HEAD
-- name: slack
-  image: themaz/drone-slack
-  settings:
-    webhook:
-      from_secret: slack_hook
-  when:
-    status: [ success, failure ]
-
-# trigger:
-  # event:
-  # - cron
-  # cron:
-  # - rickroll_onclick
-
-depends_on:
-  - lint
-  
----
-
-kind: pipeline
-type: docker
-name: Youtube
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-=======
->>>>>>> e9aa05d (changing base image to address sec concerns)
-- name: youtube  
-  image: thegeeklab/drone-docker-buildx
-  privileged: true
-  settings:
-    repo: modem7/docker-rickroll
-    purge: true
-    compress: true
-    use_cache: true
-    cache_from: "modem7/docker-rickroll:youtube"
-    platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
-      - linux/amd64
-      - linux/arm/v6
-      - linux/arm/v7
-      - linux/arm64/v8
-    dockerfile: youtube/Dockerfile
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-    tags: youtube
-
-<<<<<<< HEAD
-- name: slack
-  image: themaz/drone-slack
-  settings:
-    webhook:
-      from_secret: slack_hook
-  when:
-    status: [ success, failure ]
-
-trigger:
-  event:
-  - cron
-  cron:
-  - rickroll_youtube
-
-depends_on:
-  - lint
-
----
-
-kind: pipeline
-type: docker
-name: 1080
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: 1080
->>>>>>> 806c46a (rewriting everything)
-  image: thegeeklab/drone-docker-buildx
-  privileged: true
-  settings:
-    repo: modem7/docker-rickroll
-    purge: true
-    compress: true
-    use_cache: true
-    cache_from: "modem7/docker-rickroll:1080"
-    platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
-      - linux/amd64
-      - linux/arm/v6
-      - linux/arm/v7
-      - linux/arm64/v8
-<<<<<<< HEAD
-    dockerfile: SD/onclick/Dockerfile
-=======
-    dockerfile: 1080/Dockerfile
->>>>>>> 806c46a (rewriting everything)
-    # context: onclick/
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-    tags: 1080
-
-=======
->>>>>>> e9aa05d (changing base image to address sec concerns)
 - name: 1080
   image: thegeeklab/drone-docker-buildx
   privileged: true
@@ -257,6 +72,7 @@ steps:
     purge: true
     compress: true
     use_cache: true
+    squash: true
     cache_from: "modem7/docker-rickroll:1080"
     platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
       - linux/amd64
@@ -271,7 +87,6 @@ steps:
       from_secret: docker_password
     tags: 1080
 
-<<<<<<< HEAD
 - name: 1080onclick
   image: thegeeklab/drone-docker-buildx
   privileged: true
@@ -280,6 +95,7 @@ steps:
     purge: true
     compress: true
     use_cache: true
+    squash: true
     cache_from: "modem7/docker-rickroll:1080onclick"
     platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
       - linux/amd64
@@ -323,242 +139,6 @@ steps:
   when:
     status: [ success, failure ]
 
-<<<<<<< HEAD
-# trigger:
-  # event:
-  # - cron
-  # cron:
-<<<<<<< HEAD
-  # - rickroll_monthly_build
-
 trigger:
   event:
     - custom
-=======
-  # - rickroll_monthly_build
->>>>>>> e80c532 (update 1080 video to lower size)
-=======
-trigger:
-  event:
-  - cron
-  cron:
-  - rickroll_1080
-
-depends_on:
-  - lint
-
----
-
-kind: pipeline
-type: docker
-name: 1080onclick
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-=======
->>>>>>> e9aa05d (changing base image to address sec concerns)
-- name: 1080onclick
-  image: thegeeklab/drone-docker-buildx
-  privileged: true
-  settings:
-    repo: modem7/docker-rickroll
-    purge: true
-    compress: true
-    use_cache: true
-    cache_from: "modem7/docker-rickroll:1080onclick"
-    platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
-      - linux/amd64
-      - linux/arm/v6
-      - linux/arm/v7
-      - linux/arm64/v8
-    dockerfile: 1080/onclick/Dockerfile
-    # context: onclick/
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-    tags: 1080onclick
-
-<<<<<<< HEAD
-- name: slack
-  image: themaz/drone-slack
-  settings:
-    webhook:
-      from_secret: slack_hook
-  when:
-    status: [ success, failure ]
-
-trigger:
-  event:
-  - cron
-  cron:
-  - rickroll_1080onclick
-
-depends_on:
-  - lint
-
----
-
-kind: pipeline
-type: docker
-<<<<<<< HEAD
-name: 4k
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: 4k
-=======
-- name: 1080game
->>>>>>> e9aa05d (changing base image to address sec concerns)
-  image: thegeeklab/drone-docker-buildx
-  privileged: true
-  settings:
-    repo: modem7/docker-rickroll
-    purge: true
-    compress: true
-    use_cache: true
-<<<<<<< HEAD
-    cache_from: "modem7/docker-rickroll:4k"
-=======
-    cache_from: "modem7/docker-rickroll:1080game"
->>>>>>> e9aa05d (changing base image to address sec concerns)
-    platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
-      - linux/amd64
-      - linux/arm/v6
-      - linux/arm/v7
-      - linux/arm64/v8
-<<<<<<< HEAD
-    dockerfile: 4k/Dockerfile
-=======
-    dockerfile: 1080game/Dockerfile
->>>>>>> e9aa05d (changing base image to address sec concerns)
-    # context: onclick/
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-<<<<<<< HEAD
-    tags: 4k
-=======
-    tags: 1080game
->>>>>>> e9aa05d (changing base image to address sec concerns)
-
-- name: slack
-  image: themaz/drone-slack
-  settings:
-    webhook:
-      from_secret: slack_hook
-  when:
-<<<<<<< HEAD
-    status: [ success, failure ]
-
-trigger:
-  event:
-  - cron
-  cron:
-  - rickroll_4k
-
-depends_on:
-  - lint
-
----
-
-kind: pipeline
-type: docker
-name: 4konclick
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: 4konclick
-  image: thegeeklab/drone-docker-buildx
-  privileged: true
-  settings:
-    repo: modem7/docker-rickroll
-    purge: true
-    compress: true
-    use_cache: true
-    cache_from: "modem7/docker-rickroll:4konclick"
-    platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
-      - linux/amd64
-      - linux/arm/v6
-      - linux/arm/v7
-      - linux/arm64/v8
-    dockerfile: 4k/onclick/Dockerfile
-    # context: onclick/
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-    tags: 4konclick
-
-- name: slack
-  image: themaz/drone-slack
-  settings:
-    webhook:
-      from_secret: slack_hook
-  when:
-    status: [ success, failure ]
-
-trigger:
-  event:
-  - cron
-  cron:
-  - rickroll_4konclick
-
-depends_on:
-  - lint
-
----
-
-kind: pipeline
-type: docker
-=======
->>>>>>> a95ccf4 (removed 4k version due to size)
-name: test
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: test build
-  image: thegeeklab/drone-docker-buildx
-  privileged: true
-  settings:
-    repo: modem7/docker-rickroll
-    purge: true
-    compress: true
-    # use_cache: true
-    # cache_from: "modem7/docker-rickroll:test"
-    platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
-      - linux/amd64
-      # - linux/arm/v6
-      # - linux/arm/v7
-      # - linux/arm64/v8
-    dockerfile: test/Dockerfile
-    context: test/
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-    tags: test
-
-trigger:
-  branch:
-  - test
-
-depends_on:
-  - linttest
->>>>>>> 806c46a (rewriting everything)
-=======
-    status: [ success, failure ]
->>>>>>> e9aa05d (changing base image to address sec concerns)
