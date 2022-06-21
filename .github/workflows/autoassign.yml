@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 name: Issue assignment
 
 on:
@@ -11,4 +12,19 @@ jobs:
         - name: 'Auto-assign issue'
           uses: pozil/auto-assign-issue@v1.7.1
           with:
+=======
+name: Issue assignment
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  auto-assign:
+    runs-on: ubuntu-latest
+    steps:
+        - name: 'Auto-assign issue'
+          uses: pozil/auto-assign-issue@v1
+          with:
+>>>>>>> Stashed changes
             assignees: modem7
