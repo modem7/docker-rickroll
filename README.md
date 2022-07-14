@@ -3,7 +3,6 @@
 ![Docker Pulls](https://img.shields.io/docker/pulls/modem7/docker-rickroll) 
 ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/latest?label=latest%2Fonclick) 
 ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/1080?label=1080%2F1080onclick) 
-![Docker Image Size (tag)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/youtube?label=youtube) 
 [![Build Status](https://drone.modem7.com/api/badges/modem7/docker-rickroll/status.svg)](https://drone.modem7.com/modem7/docker-rickroll)
 [![GitHub last commit](https://img.shields.io/github/last-commit/modem7/docker-rickroll)](https://github.com/modem7/docker-rickroll)
 
@@ -25,6 +24,7 @@ Please update your files accordingly.
 | Latest | Video starts automatically, but muted. SD Quality. |
 | Onclick | Uses an onclick method with a poster image. SD Quality. |
 | 1080/1080onclick | 1080p AI remasters of the above tags. |
+| 1080game | 1080p AI remasters of the above tags with a "lost the game" onclick. |
 
 # Configuration
 
