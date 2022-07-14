@@ -24,6 +24,7 @@ Please update your files accordingly.
 | Latest | Video starts automatically, but muted. SD Quality. |
 | Onclick | Uses an onclick method with a poster image. SD Quality. |
 | 1080/1080onclick | 1080p AI remasters of the above tags. |
+| 1080game | 1080p AI remasters of the above tags with a "lost the game" onclick. |
 
 # Configuration
 
