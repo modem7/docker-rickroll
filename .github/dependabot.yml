@@ -60,17 +60,6 @@ updates:
     labels:
       - "dependencies"
 
-  - package-ecosystem: "docker" # See documentation for possible values
-    directory: "/youtube" # Location of package manifests
-    schedule:
-      interval: "daily"
-      timezone: "Europe/London"
-      time: "05:00"
-    assignees:
-      - "modem7"
-    labels:
-      - "dependencies"
-
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
