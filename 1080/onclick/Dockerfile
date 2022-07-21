@@ -1,10 +1,10 @@
-FROM nginxinc/nginx-unprivileged:1.23.0-alpine as build-stage
+FROM nginxinc/nginx-unprivileged:1.23.1-alpine as build-stage
 
 COPY 1080/onclick/src/ /usr/share/nginx/html/
 COPY MP4/1080/rickroll.mp4 /usr/share/nginx/html/rickroll.mp4
 COPY 1080/onclick/conf/nginx-site.conf /etc/nginx/conf.d/default.conf
 
-FROM nginxinc/nginx-unprivileged:1.23.0-alpine
+FROM nginxinc/nginx-unprivileged:1.23.1-alpine
 
 ARG UID=101
 ARG GID=101
