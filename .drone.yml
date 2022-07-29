@@ -1,0 +1,150 @@
+---
+
+kind: pipeline
+type: docker
+name: latest
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: Lint Dockerfile
+  image: hadolint/hadolint:latest-alpine
+  pull: if-not-exists
+  commands:
+    - hadolint --version
+    - hadolint */Dockerfile
+
+- name: SDlatest  
+  image: thegeeklab/drone-docker-buildx
+  privileged: true
+  settings:
+    repo: ${DRONE_REPO}
+    purge: true
+    compress: true
+    squash: true
+    use_cache: true
+    build_args: BUILDKIT_INLINE_CACHE=1
+    cache_from: "${DRONE_REPO}:latest"
+    dockerfile: SD/Dockerfile
+    platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
+      - linux/amd64
+      - linux/arm64/v8
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags: latest
+
+- name: SDonclick  
+  image: thegeeklab/drone-docker-buildx
+  privileged: true
+  settings:
+    repo: ${DRONE_REPO}
+    purge: true
+    compress: true
+    use_cache: true
+    squash: true
+    build_args: BUILDKIT_INLINE_CACHE=1
+    cache_from: "${DRONE_REPO}:onclick"
+    platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
+      - linux/amd64
+      - linux/arm64/v8
+    dockerfile: SD/onclick/Dockerfile
+    # context: onclick/
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags: onclick
+
+- name: 1080
+  image: thegeeklab/drone-docker-buildx
+  privileged: true
+  settings:
+    repo: ${DRONE_REPO}
+    purge: true
+    compress: true
+    use_cache: true
+    squash: true
+    build_args: BUILDKIT_INLINE_CACHE=1
+    cache_from: "${DRONE_REPO}:1080"
+    platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
+      - linux/amd64
+      - linux/arm64/v8
+    dockerfile: 1080/Dockerfile
+    # context: onclick/
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags: 1080
+
+- name: 1080onclick
+  image: thegeeklab/drone-docker-buildx
+  privileged: true
+  settings:
+    repo: ${DRONE_REPO}
+    purge: true
+    compress: true
+    use_cache: true
+    squash: true
+    build_args: BUILDKIT_INLINE_CACHE=1
+    cache_from: "${DRONE_REPO}:1080onclick"
+    platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
+      - linux/amd64
+      - linux/arm64/v8
+    dockerfile: 1080/onclick/Dockerfile
+    # context: onclick/
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags: 1080onclick
+
+- name: 1080game
+  image: thegeeklab/drone-docker-buildx
+  privileged: true
+  settings:
+    repo: ${DRONE_REPO}
+    purge: true
+    compress: true
+    use_cache: true
+    build_args: BUILDKIT_INLINE_CACHE=1
+    cache_from: "${DRONE_REPO}:1080game"
+    platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
+      - linux/amd64
+      - linux/arm64/v8
+    dockerfile: thegame/Dockerfile
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags: 1080game
+
+- name: pushrm-dockerhub
+  image: chko/docker-pushrm
+  environment:
+    DOCKER_USER:
+      from_secret: docker_username
+    DOCKER_PASS:
+      from_secret: docker_password
+    PUSHRM_FILE: README.md
+    PUSHRM_SHORT: Dockerised Rick Roll
+    PUSHRM_TARGET: ${DRONE_REPO}
+  when:
+    status:
+      - success
+
+- name: slack
+  image: themaz/drone-slack
+  settings:
+    webhook:
+      from_secret: slack_hook
+  when:
+    status: [ success, failure ]
+
+trigger:
+  event:
+    - custom
