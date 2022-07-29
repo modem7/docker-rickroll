@@ -6,7 +6,7 @@
 [![Build Status](https://drone.modem7.com/api/badges/modem7/docker-rickroll/status.svg)](https://drone.modem7.com/modem7/docker-rickroll)
 [![GitHub last commit](https://img.shields.io/github/last-commit/modem7/docker-rickroll)](https://github.com/modem7/docker-rickroll)
 
-More info can be found here: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+More info can be found [here](https://www.youtube.com/watch?v=dQw4w9WgXcQ).
 
 Image is based on nginxinc/nginx-unprivileged, and all the content is local to the container (bar for the Youtube tag).
 
