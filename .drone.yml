@@ -16,7 +16,7 @@ steps:
     - hadolint --version
     - hadolint Dockerfile*
 
-- name: 1080
+- name: latest
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
@@ -25,7 +25,7 @@ steps:
     compress: true
     use_cache: true
     build_args: BUILDKIT_INLINE_CACHE=1
-    cache_from: "${DRONE_REPO}:1080"
+    cache_from: "${DRONE_REPO}:latest"
     platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
       - linux/amd64
       - linux/arm64/v8
@@ -35,10 +35,9 @@ steps:
     password:
       from_secret: docker_password
     tags:
-      - 1080
       - latest
 
-- name: 1080onclick
+- name: onclick
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
@@ -47,7 +46,7 @@ steps:
     compress: true
     use_cache: true
     build_args: BUILDKIT_INLINE_CACHE=1
-    cache_from: "${DRONE_REPO}:1080onclick"
+    cache_from: "${DRONE_REPO}:onclick"
     platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
       - linux/amd64
       - linux/arm64/v8
@@ -56,9 +55,9 @@ steps:
       from_secret: docker_username
     password:
       from_secret: docker_password
-    tags: 1080onclick
+    tags: onclick
 
-- name: 1080game
+- name: thegame
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
@@ -67,7 +66,7 @@ steps:
     compress: true
     use_cache: true
     build_args: BUILDKIT_INLINE_CACHE=1
-    cache_from: "${DRONE_REPO}:1080game"
+    cache_from: "${DRONE_REPO}:thegame"
     platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
       - linux/amd64
       - linux/arm64/v8
@@ -76,7 +75,7 @@ steps:
       from_secret: docker_username
     password:
       from_secret: docker_password
-    tags: 1080game
+    tags: thegame
 
 - name: pushrm-dockerhub
   image: chko/docker-pushrm
