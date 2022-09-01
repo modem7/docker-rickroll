@@ -23,11 +23,10 @@ steps:
     repo: ${DRONE_REPO}
     purge: true
     compress: true
-    squash: true
     use_cache: true
     build_args: BUILDKIT_INLINE_CACHE=1
     cache_from: "${DRONE_REPO}:latest"
-    dockerfile: SD/Dockerfile
+    dockerfile: Dockerfile_SD
     platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
       - linux/amd64
       - linux/arm64/v8
@@ -45,14 +44,12 @@ steps:
     purge: true
     compress: true
     use_cache: true
-    squash: true
     build_args: BUILDKIT_INLINE_CACHE=1
     cache_from: "${DRONE_REPO}:onclick"
     platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
       - linux/amd64
       - linux/arm64/v8
-    dockerfile: SD/onclick/Dockerfile
-    # context: onclick/
+    dockerfile: Dockerfile_SD_onclick
     username:
       from_secret: docker_username
     password:
@@ -67,14 +64,12 @@ steps:
     purge: true
     compress: true
     use_cache: true
-    squash: true
     build_args: BUILDKIT_INLINE_CACHE=1
     cache_from: "${DRONE_REPO}:1080"
     platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
       - linux/amd64
       - linux/arm64/v8
-    dockerfile: 1080/Dockerfile
-    # context: onclick/
+    dockerfile: Dockerfile_1080
     username:
       from_secret: docker_username
     password:
@@ -89,14 +84,12 @@ steps:
     purge: true
     compress: true
     use_cache: true
-    squash: true
     build_args: BUILDKIT_INLINE_CACHE=1
     cache_from: "${DRONE_REPO}:1080onclick"
     platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
       - linux/amd64
       - linux/arm64/v8
-    dockerfile: 1080/onclick/Dockerfile
-    # context: onclick/
+    dockerfile: Dockerfile_1080_onclick
     username:
       from_secret: docker_username
     password:
@@ -116,7 +109,7 @@ steps:
     platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
       - linux/amd64
       - linux/arm64/v8
-    dockerfile: thegame/Dockerfile
+    dockerfile: Dockerfile_1080_onclick_game
     username:
       from_secret: docker_username
     password:
