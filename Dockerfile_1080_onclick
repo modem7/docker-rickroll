@@ -8,9 +8,9 @@ ARG UID=101
 ARG GID=101
 
 # Copy files into image
-COPY --link onclick/download.jpg /usr/share/nginx/html/
-COPY --link MP4/1080/rickroll.mp4 /usr/share/nginx/html/rickroll.mp4
-COPY --link --chmod=755 80-generate-onlick.sh /docker-entrypoint.d
+COPY --link onclick/standard/download.jpg /usr/share/nginx/html/
+COPY --link MP4/1080/rickroll.mp4 /usr/share/nginx/html/
+COPY --link --chmod=755 80-generate-onlick.sh /docker-entrypoint.d/
 
 # Change permissions to index.html
 RUN chown $UID:0 /usr/share/nginx/html/index.html
