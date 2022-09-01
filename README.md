@@ -28,8 +28,11 @@ Please update your files accordingly.
 | Variable | Description | Default |
 | :----: | --- | --- |
 | TITLE | Changes the title of the webpage. | Rickroll |
+| HEIGHT | Changes the height of the video. | 100vh |
+| WIDTH | Changes the width of the video. | 100% |
+| POSTER | Changes the onclick image (only on onclick and thegame tags). Accepts URL. | download.jpg |
 
-# Configuration
+# Configuration example
 
 ```yaml
 version: "2.4"
