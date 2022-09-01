@@ -2,8 +2,6 @@
 
 set -eu
 
-TITLE="${TITLE:-"Rickroll"}"
-
 #Create nginx conf
 tee /etc/nginx/conf.d/default.conf << 'EOF' >/dev/null
 server {
@@ -31,31 +29,6 @@ server {
         expires 5d;
     }
 }
-EOF
-
-#Create index.html
-tee /usr/share/nginx/html/index.html << EOF >/dev/null
-<!DOCTYPE html>
-<html>
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
-<title>$TITLE</title>
-</head>
-<body>
-<div style="text-align: center;">
-  <video width="100%" autoplay loop controls muted>
-    <source src="rickroll.mp4" type="video/mp4">
-  </video>
-<style>
-    video {
-        height: 100vh;
-        width: 100%;
-        object-fit: cover; /**/ use "cover" to avoid distortion
-        position: absolute;
-    }
-</style>
-</div>
-</html>
 EOF
 
 exec "$@"
