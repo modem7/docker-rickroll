@@ -14,7 +14,7 @@ steps:
   pull: if-not-exists
   commands:
     - hadolint --version
-    - hadolint */Dockerfile
+    - hadolint Dockerfile*
 
 - name: 1080
   image: thegeeklab/drone-docker-buildx
