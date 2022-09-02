@@ -32,8 +32,12 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
 </html>
 EOF
 
+echo ""
+echo "#####################"
 echo "Website title is: $TITLE"
 echo "Website height: $HEIGHT"
 echo "Website width: $WIDTH"
+echo "#####################"
+echo ""
 
 exec "$@"
