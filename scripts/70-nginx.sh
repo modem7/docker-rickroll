@@ -36,6 +36,10 @@ EOF
 # Apply port variable
 sed -i s/'${PORT}'/${PORT}/g /etc/nginx/conf.d/default.conf
 
+echo ""
+echo "#####################"
 echo "Nginx running on port $PORT"
+echo "#####################"
+echo ""
 
 exec "$@"
