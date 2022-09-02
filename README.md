@@ -27,6 +27,7 @@ Please update your files accordingly.
 # Environment Variables
 | Variable | Description | Default |
 | :----: | --- | --- |
+| PORT | Changes the port nginx is listening on. | 8080 |
 | TITLE | Changes the title of the webpage. | Rickroll |
 | HEIGHT | Changes the height of the video. | 100vh |
 | WIDTH | Changes the width of the video. | 100% |

@@ -2,10 +2,12 @@
 
 set -eu
 
-#Create nginx conf
+PORT="${PORT:-"8080"}"
+
+# Create nginx conf with port variable
 tee /etc/nginx/conf.d/default.conf << 'EOF' >/dev/null
 server {
-    listen       8080;
+    listen       ${PORT};
 
     root /usr/share/nginx/html;
     index index.html;
@@ -30,5 +32,10 @@ server {
     }
 }
 EOF
+
+# Apply port variable
+sed -i s/'${PORT}'/${PORT}/g /etc/nginx/conf.d/default.conf
+
+echo "Nginx running on port $PORT"
 
 exec "$@"
