@@ -23,7 +23,7 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
     video {
         height: $HEIGHT;
         width: $WIDTH;
-        object-fit: cover; /**/ use "cover" to avoid distortion
+        object-fit: cover; /* use "cover" to avoid distortion */
         position: absolute;
     }
 </style>
