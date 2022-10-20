@@ -24,6 +24,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: Dockerfile_1080_onclick_game
+          file: ./Dockerfile_1080_onclick_game
           pull: false
           push: false
