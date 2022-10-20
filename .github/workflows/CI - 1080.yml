@@ -24,6 +24,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: Dockerfile_1080
+          file: ./Dockerfile_1080
           pull: false
           push: false
