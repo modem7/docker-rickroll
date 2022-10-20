@@ -3,10 +3,10 @@ name: Docker CI - 1080onclick
 on:
   push:
     paths:
-      - 1080/onclick/Dockerfile
+      - Dockerfile_1080_onclick
   pull_request:
     paths:
-      - 1080/onclick/Dockerfile
+      - Dockerfile_1080_onclick
   workflow_dispatch:
 
 jobs:
@@ -24,6 +24,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: 1080/onclick/Dockerfile
+          file: Dockerfile_1080_onclick
           pull: false
           push: false

@@ -3,10 +3,10 @@ name: Docker CI - 1080
 on:
   push:
     paths:
-      - 1080/Dockerfile
+      - Dockerfile_1080
   pull_request:
     paths:
-      - 1080/Dockerfile
+      - Dockerfile_1080
   workflow_dispatch:
 
 jobs:
@@ -24,6 +24,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: 1080/Dockerfile
+          file: Dockerfile_1080
           pull: false
           push: false

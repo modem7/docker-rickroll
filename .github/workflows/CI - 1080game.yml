@@ -3,10 +3,10 @@ name: Docker CI - 1080game
 on:
   push:
     paths:
-      - thegame/Dockerfile
+      - Dockerfile_1080_onclick_game
   pull_request:
     paths:
-      - thegame/Dockerfile
+      - Dockerfile_1080_onclick_game
   workflow_dispatch:
 
 jobs:
@@ -24,6 +24,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: thegame/Dockerfile
+          file: Dockerfile_1080_onclick_game
           pull: false
           push: false
