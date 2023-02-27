@@ -5,7 +5,7 @@ set -eu
 TITLE="${TITLE:-"Rickroll"}"
 HEIGHT="${HEIGHT:-"100vh"}"
 WIDTH="${WIDTH:-"100%"}"
-
+HEADLINE="${HEADLINE:-""}"
 #Create index.html
 tee /usr/share/nginx/html/index.html << EOF >/dev/null
 <!DOCTYPE html>
@@ -15,6 +15,7 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
 <title>$TITLE</title>
 </head>
 <body>
+$HEADLINE
 <div style="text-align: center;">
   <video width="$WIDTH" autoplay loop controls muted>
     <source src="rickroll.mp4" type="video/mp4">
@@ -36,6 +37,7 @@ echo "#####################"
 echo "Website title is: $TITLE"
 echo "Website height: $HEIGHT"
 echo "Website width: $WIDTH"
+echo "Headline is: $HEADLINE"
 echo "#####################"
 echo ""
 
