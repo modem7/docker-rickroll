@@ -10,25 +10,44 @@ HEADLINE="${HEADLINE:-""}"
 tee /usr/share/nginx/html/index.html << EOF >/dev/null
 <!DOCTYPE html>
 <html>
-<head>
-<meta http-equiv="content-type" content="text/html; charset=utf-8">
-<title>$TITLE</title>
-</head>
-<body>
-$HEADLINE
-<div style="text-align: center;">
-  <video width="$WIDTH" autoplay loop controls muted>
-    <source src="rickroll.mp4" type="video/mp4">
-  </video>
-<style>
-    video {
-        height: $HEIGHT;
-        width: $WIDTH;
-        object-fit: cover; /**/ use "cover" to avoid distortion
-        position: absolute;
-    }
-</style>
-</div>
+   <body>
+       <video autoplay loop width="100%">
+
+    <source src="video.mp4"
+            type="video/mp4">
+
+    Sorry, your browser doesn't support embedded videos.
+</video>
+      <style>
+          video {
+              height: $HEIGHT;
+              width: $WIDTH;
+              object-fit: cover; /**/ use "cover" to avoid distortion
+              position: absolute;
+          }
+      </style>
+      <script>
+         // Change the variables below to your liking
+         const currentURL = "video.mp4";
+         const pageTitle = "Loading...";
+         // End of changable variables
+         
+         function setTitle() {
+            document.title = pageTitle;
+         }
+         
+         function redirect() {
+            window.location.href = currentURL;
+         }
+         
+         function onload() {
+            setTitle();
+            redirect();
+         }
+         
+         window.onload = onload();
+       </script>
+   </body>
 </html>
 EOF
 

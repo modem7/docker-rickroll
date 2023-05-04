@@ -20,9 +20,7 @@ Please update your files accordingly.
 # Tags
 | Tag | Description |
 | :----: | --- |
-| latest | Video starts automatically, but muted. 1080p AI remaster. |
-| onclick | Uses an onclick method with a poster image. 1080p AI remaster. |
-| thegame | 1080p AI remaster with a "lost the game" onclick. |
+| latest | Video starts automatically. 1080p AI remaster. |
 
 # Environment Variables
 | Variable | Description | Default |
@@ -32,7 +30,6 @@ Please update your files accordingly.
 | HEIGHT | Changes the height of the video. | 100vh |
 | WIDTH | Changes the width of the video. | 100% |
 | HEADLINE | Allows for a custom body tag. | empty |
-| POSTER | Changes the onclick image (only on onclick and thegame tags). Accepts URL. | download.jpg |
 
 # Configuration example
 
