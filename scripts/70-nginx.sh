@@ -18,7 +18,7 @@ events {
 
 http {
     proxy_temp_path /tmp/proxy_temp;
-    proxy_cache_path /tmp/mycache keys_zone=mycache:50m;
+    proxy_cache_path /tmp/mycache inactive=1h levels=1:2 use_temp_path=off keys_zone=mycache:10m max_size=200m;
     client_body_temp_path /tmp/client_temp;
     fastcgi_temp_path /tmp/fastcgi_temp;
     uwsgi_temp_path /tmp/uwsgi_temp;
@@ -28,7 +28,7 @@ http {
                       '$status $body_bytes_sent "$http_referer" '
                       '"$http_user_agent" "$http_x_forwarded_for"';
 
-    access_log  /var/log/nginx/access.log  main;
+    access_log    /var/log/nginx/access.log  main;
     include       /etc/nginx/conf.d/*.conf;
     include       /etc/nginx/mime.types;
     default_type  application/octet-stream;
@@ -38,6 +38,9 @@ http {
     tcp_nopush     on;
     keepalive_timeout  65;
     gzip  on;
+    gzip_proxied any;
+    gzip_vary on;
+    gzip_http_version 1.1;
 
     server {
         # add proxy caches
@@ -55,7 +58,7 @@ http {
             #try_files $uri $uri/ /index.html;
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
-            proxy_pass      http://127.0.0.1:8088/janus;
+            proxy_pass      http://localhost:8088/janus;
         }
 
         location /rtcapp {
@@ -81,18 +84,29 @@ http {
         location ~* \.(jpg|jpeg|gif|png|css|js|ico|webp|tiff|ttf|svg|mp4)$ {
             mp4;
             mp4_buffer_size     1M;
-            mp4_max_buffer_size 3M;
+            mp4_max_buffer_size 20M;
+            
+            add_header Accept-Ranges bytes;
+            # proxy_force_ranges on;
+            
+            proxy_buffering on;
+
+            # add_header X-Proxy-Cache $upstream_cache_status;
+            add_header X-Cache-Status $upstream_cache_status;
 
             aio threads=default;
             
             # enable caching for mp4 videos
             proxy_cache mycache;
-            proxy_cache_valid 200 300s;
+            proxy_cache_valid any 1h;
             proxy_cache_lock on;
+            proxy_cache_background_update on;
+            proxy_cache_revalidate on;
 
             # enable nginx slicing
             slice              1m;
             proxy_cache_key    $host$uri$is_args$args$slice_range;
+            #proxy_cache_key    $uri$is_args$args$slice_range;
             proxy_set_header   Range $slice_range;
             proxy_http_version 1.1;
 
@@ -103,6 +117,8 @@ http {
             proxy_cache_lock_age 200s;
 
             proxy_cache_use_stale updating;
+            
+            proxy_pass http://localhost:${PORT};
         }
     }
 }
