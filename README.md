@@ -15,10 +15,6 @@ Image is based on nginxinc/nginx-unprivileged, and all the content is local to t
 
 ![image](https://user-images.githubusercontent.com/4349962/187975538-9b7ec5db-3cf4-4dfa-964c-019eba9e272f.png)
 
-# Breaking change
-Due to changing the image to nginxinc/nginx-unprivileged, the ports have changed from `80` to `8080`. 
-Please update your files accordingly. 
-
 # Tags
 | Tag | Description |
 | :----: | --- |
