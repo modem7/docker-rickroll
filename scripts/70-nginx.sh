@@ -54,31 +54,10 @@ http {
 
         error_page 404 /index.html;
 
-        location /rtc {
-            #try_files $uri $uri/ /index.html;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_pass      http://localhost:8088/janus;
-        }
-
-        location /rtcapp {
-            # enable thread pools for livestream
-            aio threads=default;
-
-            proxy_pass http://localhost:8188;
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection "upgrade";
-            proxy_set_header Host $host;
-        }
         location ~ \.flv$ {
             # enable thread pool
             aio threads=default;
             flv;
-        }
-
-        location /healthz {
-            return 200;
         }
 
         location ~* \.(jpg|jpeg|gif|png|css|js|ico|webp|tiff|ttf|svg|mp4)$ {
@@ -120,6 +99,20 @@ http {
             
             proxy_pass http://localhost:${PORT};
         }
+    }
+}
+EOF
+
+tee /etc/nginx/conf.d/health-check.conf << 'EOF' >/dev/null
+server {
+    listen       9090;
+    server_name  localhost;
+
+    location /healthz {
+        access_log off;
+        error_log   off;
+        return 200 "healthy\n";
+        add_header Content-Type text/plain;
     }
 }
 EOF
