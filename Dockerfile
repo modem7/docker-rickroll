@@ -18,7 +18,7 @@ RUN chown $UID:0 /usr/share/nginx/html/index.html
 # Document what port is required
 EXPOSE 8080
 
-healthcheck --interval=30s --timeout=10s --retries=3 --start-period=10s \
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=10s \
    cmd curl -fss http://localhost:9090/healthz || exit 1
 
 STOPSIGNAL SIGQUIT
