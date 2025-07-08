@@ -24,10 +24,8 @@ Image is based on nginxinc/nginx-unprivileged, and all the content is local to t
 | Variable | Description | Default |
 | :----: | --- | --- |
 | PORT | Changes the port nginx is listening on. | 8080 |
-| TITLE | Changes the title of the webpage. | Rickroll |
 | HEIGHT | Changes the height of the video. | 100vh |
 | WIDTH | Changes the width of the video. | 100% |
-| HEADLINE | Allows for a custom body tag. | empty |
 
 # Configuration example
 
@@ -41,6 +39,4 @@ services:
     container_name: Rickroll
     ports:
       - 8080:8080
-    environment:
-      - TITLE="Rickroll" # Changes the title of the webpage
 ```

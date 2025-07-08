@@ -53,10 +53,8 @@ EOF
 
 echo ""
 echo "#####################"
-echo "Website title is: $TITLE"
 echo "Website height: $HEIGHT"
 echo "Website width: $WIDTH"
-echo "Headline is: $HEADLINE"
 echo "#####################"
 echo ""
 
