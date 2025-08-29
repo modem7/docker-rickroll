@@ -24,8 +24,6 @@ Image is based on nginxinc/nginx-unprivileged, and all the content is local to t
 | Variable | Description | Default |
 | :----: | --- | --- |
 | PORT | Changes the port nginx is listening on. | 8080 |
-| HEIGHT | Changes the height of the video. | 100vh |
-| WIDTH | Changes the width of the video. | 100% |
 
 # Configuration example
 
