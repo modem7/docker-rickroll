@@ -191,8 +191,7 @@ steps:
   depends_on:
     - Test Container Structure
     - Test Container Startup
-    - Test HTTP Response and Health Check
-    - Test Health Check and Docker Health Status
+    - Test HTTP and Health Checks
     - Test Volume Mount Support
     - Test MP4 Serving and Nginx Features
     - Test Security
