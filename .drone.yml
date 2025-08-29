@@ -100,7 +100,7 @@ steps:
     - docker stop volume-test-${DRONE_BUILD_NUMBER}
     - docker rm volume-test-${DRONE_BUILD_NUMBER}
   depends_on:
-    - Test Health Check and Docker Health Status
+    - Test HTTP and Health Checks
 
 - name: Test MP4 Serving and Nginx Features
   image: docker:dind
