@@ -168,6 +168,14 @@ steps:
       path: /var/run/docker.sock
   commands:
     - docker rmi test-image:${DRONE_BUILD_NUMBER} || true
+  depends_on:
+    - Test Container Structure
+    - Test Container Startup
+    - Test HTTP and Health Checks
+    - Test Volume Mount Support
+    - Test MP4 Serving and Nginx Features
+    - Test Security
+    - Test Resource Usage
 
 - name: Build and Push Production
   image: thegeeklab/drone-docker-buildx
