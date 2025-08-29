@@ -239,7 +239,6 @@ steps:
     - Test HTTP Response and Health Check
     - Test Health Check and Docker Health Status
     - Test Environment Variables and Configuration
-    - Test HTML Content and Video Features
     - Test Volume Mount Support
     - Test MP4 Serving and Nginx Features
     - Test Security
