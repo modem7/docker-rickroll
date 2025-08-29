@@ -57,46 +57,32 @@ steps:
   depends_on:
     - Build Test Image
 
-- name: Test HTTP Response and Health Check
+- name: Test HTTP and Health Checks
   image: docker:dind
   privileged: true
   volumes:
     - name: docker
       path: /var/run/docker.sock
   commands:
-    - docker run -d --name http-test-${DRONE_BUILD_NUMBER} test-image:${DRONE_BUILD_NUMBER}
-    - sleep 20
-    - docker exec http-test-${DRONE_BUILD_NUMBER} wget -q --spider http://localhost:8080/ || exit 1
-    - docker exec http-test-${DRONE_BUILD_NUMBER} curl -f http://localhost:9090/healthz || exit 1
-    - >
-      docker exec http-test-${DRONE_BUILD_NUMBER} curl -s http://localhost:9090/healthz | grep -q "healthy"
-    - >
-      docker exec http-test-${DRONE_BUILD_NUMBER} curl -I http://localhost:8080/ | grep -q "200 OK"
-    - >
-      docker exec http-test-${DRONE_BUILD_NUMBER} cat /etc/nginx/nginx.conf | grep -q "listen.*8080"
-    - >
-      docker exec http-test-${DRONE_BUILD_NUMBER} cat /etc/nginx/conf.d/health-check.conf | grep -q "listen.*9090"
-    - docker stop http-test-${DRONE_BUILD_NUMBER}
-    - docker rm http-test-${DRONE_BUILD_NUMBER}
+    - docker run -d --name test-${DRONE_BUILD_NUMBER} test-image:${DRONE_BUILD_NUMBER}
+    - |
+      for i in $(seq 1 30); do
+        docker exec test-${DRONE_BUILD_NUMBER} curl -fsS http://localhost:9090/healthz >/dev/null && break
+        sleep 2
+      done
+    - docker exec test-${DRONE_BUILD_NUMBER} wget -q --spider http://localhost:8080/ || exit 1
+    - docker exec test-${DRONE_BUILD_NUMBER} curl -f http://localhost:9090/healthz || exit 1
+    - docker exec test-${DRONE_BUILD_NUMBER} curl -s http://localhost:9090/healthz | grep -q "healthy"
+    - docker exec test-${DRONE_BUILD_NUMBER} curl -I http://localhost:8080/ | grep -q "200 OK"
+    - docker exec test-${DRONE_BUILD_NUMBER} cat /etc/nginx/nginx.conf | grep -q "listen.*8080"
+    - docker exec test-${DRONE_BUILD_NUMBER} cat /etc/nginx/conf.d/health-check.conf | grep -q "listen.*9090"
+    # Docker health status check (no JSON/quotes; YAML-safe)
+    - docker inspect --format={{.State.Health.Status}} test-${DRONE_BUILD_NUMBER} | grep -qx healthy
+    - docker stop test-${DRONE_BUILD_NUMBER}
+    - docker rm test-${DRONE_BUILD_NUMBER}
   depends_on:
     - Build Test Image
 
-- name: Test Health Check and Docker Health Status
-  image: docker:dind
-  privileged: true
-  volumes:
-    - name: docker
-      path: /var/run/docker.sock
-  commands:
-    - docker run -d --name health-test-${DRONE_BUILD_NUMBER} test-image:${DRONE_BUILD_NUMBER}
-    - sleep 45
-    - >
-      docker inspect health-test-${DRONE_BUILD_NUMBER} | grep -q '"Status": "healthy"' || exit 1
-    - docker exec health-test-${DRONE_BUILD_NUMBER} curl -f http://localhost:9090/healthz
-    - docker stop health-test-${DRONE_BUILD_NUMBER}
-    - docker rm health-test-${DRONE_BUILD_NUMBER}
-  depends_on:
-    - Test HTTP Response and Health Check
 
 - name: Test Volume Mount Support
   image: docker:dind
