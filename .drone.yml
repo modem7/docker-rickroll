@@ -54,6 +54,8 @@ steps:
     - docker exec test-container-${DRONE_BUILD_NUMBER} pgrep nginx
     - docker stop test-container-${DRONE_BUILD_NUMBER}
     - docker rm test-container-${DRONE_BUILD_NUMBER}
+  depends_on:
+    - Build Test Image
 
 - name: Test HTTP Response and Health Check
   image: docker:dind
