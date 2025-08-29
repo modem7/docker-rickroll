@@ -16,7 +16,204 @@ steps:
     - hadolint --version
     - hadolint Dockerfile*
 
-- name: latest
+- name: Build Test Image
+  image: docker:dind
+  privileged: true
+  volumes:
+    - name: docker
+      path: /var/run/docker.sock
+  commands:
+    - docker build -t test-image:${DRONE_BUILD_NUMBER} --build-arg BUILDKIT_INLINE_CACHE=1 .
+
+- name: Test Container Structure
+  image: docker:dind
+  privileged: true
+  volumes:
+    - name: docker
+      path: /var/run/docker.sock
+  commands:
+    - docker inspect test-image:${DRONE_BUILD_NUMBER}
+    - >
+      docker inspect test-image:${DRONE_BUILD_NUMBER} | grep -q "8080"
+    - >
+      docker run --rm test-image:${DRONE_BUILD_NUMBER} id | grep -q "uid=101"
+  depends_on:
+    - Build Test Image
+
+- name: Test File Permissions and Content
+  image: docker:dind
+  privileged: true
+  volumes:
+    - name: docker
+      path: /var/run/docker.sock
+  commands:
+    - >
+      docker run --rm test-image:${DRONE_BUILD_NUMBER} ls -la /usr/share/nginx/html/ | grep -q ".mp4"
+    - >
+      docker run --rm test-image:${DRONE_BUILD_NUMBER} ls -l /usr/share/nginx/html/index.html | grep -q "101.*0"
+    - >
+      docker run --rm test-image:${DRONE_BUILD_NUMBER} ls -la /docker-entrypoint.d/ | grep -q "rwxr-xr-x.*\.sh"
+  depends_on:
+    - Build Test Image
+
+- name: Test Container Startup
+  image: docker:dind
+  privileged: true
+  volumes:
+    - name: docker
+      path: /var/run/docker.sock
+  commands:
+    - docker run -d --name test-container-${DRONE_BUILD_NUMBER} -p 20001:8080 test-image:${DRONE_BUILD_NUMBER}
+    - sleep 10
+    - >
+      docker ps | grep test-container-${DRONE_BUILD_NUMBER}
+    - docker exec test-container-${DRONE_BUILD_NUMBER} pgrep nginx
+    - docker stop test-container-${DRONE_BUILD_NUMBER}
+    - docker rm test-container-${DRONE_BUILD_NUMBER}
+  depends_on:
+    - Test File Permissions and Content
+
+- name: Test HTTP Response and Health Check
+  image: docker:dind
+  privileged: true
+  volumes:
+    - name: docker
+      path: /var/run/docker.sock
+  commands:
+    - docker run -d --name http-test-${DRONE_BUILD_NUMBER} test-image:${DRONE_BUILD_NUMBER}
+    - sleep 20
+    - docker exec http-test-${DRONE_BUILD_NUMBER} wget -q --spider http://localhost:8080/ || exit 1
+    - docker exec http-test-${DRONE_BUILD_NUMBER} curl -f http://localhost:9090/healthz || exit 1
+    - >
+      docker exec http-test-${DRONE_BUILD_NUMBER} curl -s http://localhost:9090/healthz | grep -q "healthy"
+    - >
+      docker exec http-test-${DRONE_BUILD_NUMBER} curl -I http://localhost:8080/ | grep -q "200 OK"
+    - >
+      docker exec http-test-${DRONE_BUILD_NUMBER} cat /etc/nginx/nginx.conf | grep -q "listen.*8080"
+    - >
+      docker exec http-test-${DRONE_BUILD_NUMBER} cat /etc/nginx/conf.d/health-check.conf | grep -q "listen.*9090"
+    - docker stop http-test-${DRONE_BUILD_NUMBER}
+    - docker rm http-test-${DRONE_BUILD_NUMBER}
+  depends_on:
+    - Build Test Image
+
+- name: Test Health Check and Docker Health Status
+  image: docker:dind
+  privileged: true
+  volumes:
+    - name: docker
+      path: /var/run/docker.sock
+  commands:
+    - docker run -d --name health-test-${DRONE_BUILD_NUMBER} test-image:${DRONE_BUILD_NUMBER}
+    - sleep 45
+    - >
+      docker inspect health-test-${DRONE_BUILD_NUMBER} | grep -q '"Status": "healthy"' || exit 1
+    - docker exec health-test-${DRONE_BUILD_NUMBER} curl -f http://localhost:9090/healthz
+    - docker stop health-test-${DRONE_BUILD_NUMBER}
+    - docker rm health-test-${DRONE_BUILD_NUMBER}
+  depends_on:
+    - Test HTTP Response and Health Check
+
+- name: Test Environment Variables and Configuration
+  image: docker:dind
+  privileged: true
+  volumes:
+    - name: docker
+      path: /var/run/docker.sock
+  commands:
+    - >
+      docker run --rm test-image:${DRONE_BUILD_NUMBER} cat /etc/nginx/nginx.conf | grep -q "listen.*8080"
+    - >
+      docker run --rm -e PORT=9000 test-image:${DRONE_BUILD_NUMBER} sh -c 'cat /etc/nginx/nginx.conf | grep -q "listen.*9000"'
+  depends_on:
+    - Build Test Image
+
+- name: Test Volume Mount Support
+  image: docker:dind
+  privileged: true
+  volumes:
+    - name: docker
+      path: /var/run/docker.sock
+  commands:
+    - docker run -d --name volume-test-${DRONE_BUILD_NUMBER} -p 20004:8080 -v /tmp:/tmp test-image:${DRONE_BUILD_NUMBER}
+    - sleep 10
+    - >
+      docker ps | grep volume-test-${DRONE_BUILD_NUMBER}
+    - >
+      docker exec volume-test-${DRONE_BUILD_NUMBER} curl -I http://localhost:8080/ | grep -q "200 OK"
+    - docker stop volume-test-${DRONE_BUILD_NUMBER}
+    - docker rm volume-test-${DRONE_BUILD_NUMBER}
+  depends_on:
+    - Test Health Check and Docker Health Status
+
+- name: Test MP4 Serving and Nginx Features
+  image: docker:dind
+  privileged: true
+  volumes:
+    - name: docker
+      path: /var/run/docker.sock
+  commands:
+    - docker run -d --name mp4-test-${DRONE_BUILD_NUMBER} -p 20005:8080 test-image:${DRONE_BUILD_NUMBER}
+    - sleep 15
+    - >
+      docker exec mp4-test-${DRONE_BUILD_NUMBER} sh -c "ls /usr/share/nginx/html/*.mp4 | head -1 | xargs basename" > /tmp/mp4_file
+    - export MP4_FILE=$(cat /tmp/mp4_file)
+    - echo "Testing MP4 file - $MP4_FILE"
+    - >
+      docker exec mp4-test-${DRONE_BUILD_NUMBER} sh -c "curl -I http://localhost:8080/\$(ls /usr/share/nginx/html/*.mp4 | head -1 | xargs basename) | grep -q '200 OK'"
+    - >
+      docker exec mp4-test-${DRONE_BUILD_NUMBER} sh -c "curl -I http://localhost:8080/\$(ls /usr/share/nginx/html/*.mp4 | head -1 | xargs basename) | grep -q 'Accept-Ranges'"
+    - >
+      docker exec mp4-test-${DRONE_BUILD_NUMBER} curl -H "Accept-Encoding: gzip" -I http://localhost:8080/ | grep -q "gzip" || true
+    - >
+      docker exec mp4-test-${DRONE_BUILD_NUMBER} curl -s http://localhost:8080/nonexistent | grep -q "html"
+    - docker stop mp4-test-${DRONE_BUILD_NUMBER}
+    - docker rm mp4-test-${DRONE_BUILD_NUMBER}
+  depends_on:
+    - Test Volume Mount Support
+
+- name: Test Security
+  image: docker:dind
+  privileged: true
+  volumes:
+    - name: docker
+      path: /var/run/docker.sock
+  commands:
+    - >
+      docker run --rm test-image:${DRONE_BUILD_NUMBER} whoami | grep -v root
+    - docker run --rm test-image:${DRONE_BUILD_NUMBER} which sudo && exit 1 || true
+    - >
+      docker run --rm test-image:${DRONE_BUILD_NUMBER} find /usr/share/nginx/html -type f -perm /o+w | wc -l | grep -q "^0$"
+  depends_on:
+    - Build Test Image
+
+- name: Test Resource Usage
+  image: docker:dind
+  privileged: true
+  volumes:
+    - name: docker
+      path: /var/run/docker.sock
+  commands:
+    - docker run -d --name resource-test-${DRONE_BUILD_NUMBER} --memory=256m --cpus=0.5 test-image:${DRONE_BUILD_NUMBER}
+    - sleep 20
+    - >
+      docker ps | grep resource-test-${DRONE_BUILD_NUMBER}
+    - docker stats --no-stream resource-test-${DRONE_BUILD_NUMBER}
+    - docker stop resource-test-${DRONE_BUILD_NUMBER}
+    - docker rm resource-test-${DRONE_BUILD_NUMBER}
+  depends_on:
+    - Build Test Image
+
+- name: Cleanup Test Images
+  image: docker:dind
+  privileged: true
+  volumes:
+    - name: docker
+      path: /var/run/docker.sock
+  commands:
+    - docker rmi test-image:${DRONE_BUILD_NUMBER} || true
+
+- name: Build and Push Production
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
@@ -26,7 +223,7 @@ steps:
     use_cache: true
     build_args: BUILDKIT_INLINE_CACHE=1
     cache_from: "${DRONE_REPO}:latest"
-    platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
+    platforms:
       - linux/amd64
       - linux/arm64/v8
     username:
@@ -35,6 +232,18 @@ steps:
       from_secret: docker_password
     tags:
       - latest
+  depends_on:
+    - Test Container Structure
+    - Test File Permissions and Content
+    - Test Container Startup
+    - Test HTTP Response and Health Check
+    - Test Health Check and Docker Health Status
+    - Test Environment Variables and Configuration
+    - Test HTML Content and Video Features
+    - Test Volume Mount Support
+    - Test MP4 Serving and Nginx Features
+    - Test Security
+    - Test Resource Usage
 
 - name: pushrm-dockerhub
   image: chko/docker-pushrm
@@ -49,6 +258,8 @@ steps:
   when:
     status:
       - success
+  depends_on:
+    - Build and Push Production
 
 - name: slack
   image: themaz/drone-slack
@@ -57,6 +268,13 @@ steps:
       from_secret: slack_hook
   when:
     status: [ success, failure ]
+  depends_on:
+    - pushrm-dockerhub
+
+volumes:
+- name: docker
+  host:
+    path: /var/run/docker.sock
 
 trigger:
   event:
