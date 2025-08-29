@@ -2,7 +2,7 @@
 
 kind: pipeline
 type: docker
-name: latest
+name: docker-rickroll
 
 platform:
   os: linux
@@ -16,7 +16,102 @@ steps:
     - hadolint --version
     - hadolint Dockerfile*
 
-- name: latest
+- name: build-test-image
+  image: docker:dind
+  privileged: true
+  volumes:
+    - name: docker
+      path: /var/run/docker.sock
+  depends_on:
+    - Lint Dockerfile
+  commands:
+    # Debug: Check build context for MP4 files
+    - echo "Checking build context for MP4 files:"
+    - ls -la MP4/1080/ || echo "MP4/1080/ directory not found"
+    - find . -name "*.mp4" -type f || echo "No MP4 files found in build context"
+    
+    # Build with cache invalidation
+    - docker build --no-cache -t rickroll:test .
+
+- name: test-container
+  image: docker:dind
+  privileged: true
+  volumes:
+    - name: docker
+      path: /var/run/docker.sock
+  commands:
+    # Cleanup any existing test containers first
+    - docker stop rickroll-test-${DRONE_BUILD_NUMBER} 2>/dev/null || true
+    - docker rm rickroll-test-${DRONE_BUILD_NUMBER} 2>/dev/null || true
+    
+    # Test container starts successfully (no host port mapping needed for internal tests)
+    - docker run -d --name rickroll-test-${DRONE_BUILD_NUMBER} rickroll:test
+    
+    # Wait for container to be ready (dynamic wait with health check)
+    - |
+      for i in $(seq 1 30); do
+        if docker exec rickroll-test-${DRONE_BUILD_NUMBER} curl -fsS http://localhost:9090/healthz >/dev/null 2>&1; then
+          echo "Container is ready after $i attempts"
+          break
+        fi
+        if [ $i -eq 30 ]; then
+          echo "Container failed to become ready after 30 attempts"
+          docker logs rickroll-test-${DRONE_BUILD_NUMBER}
+          exit 1
+        fi
+        echo "Waiting for container... attempt $i/30"
+        sleep 2
+      done
+    
+    # Test healthcheck endpoint works
+    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} curl -f http://localhost:9090/healthz || exit 1
+    
+    # Test MP4 file exists and is accessible
+    - echo "Checking for MP4 files in container:"
+    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} ls -la /usr/share/nginx/html/
+    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} find /usr/share/nginx/html/ -name "*.mp4" -type f || echo "No MP4 files found in container"
+    
+    # Test MP4 file is accessible via HTTP
+    - echo "Testing MP4 file access..."
+    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} curl -I http://localhost:8080/video.mp4 | grep "200 OK"
+    
+    # Test PORT variable functionality (default 8080)
+    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} curl -I http://localhost:8080/ | grep "200 OK"
+    
+    # Test nginx security - non-root user
+    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} whoami | grep -v root
+    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} id | grep "uid=101"
+    
+    # Test nginx security - no sudo access
+    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} which sudo && exit 1 || true
+    
+    # Test file permissions (no world-writable files)
+    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} find /usr/share/nginx/html -type f -perm /o+w | wc -l | grep "^0$"
+    
+    # Cleanup test container
+    - docker stop rickroll-test-${DRONE_BUILD_NUMBER}
+    - docker rm rickroll-test-${DRONE_BUILD_NUMBER}
+  depends_on:
+    - build-test-image
+
+- name: cleanup-test-image
+  image: docker:dind
+  privileged: true
+  volumes:
+    - name: docker
+      path: /var/run/docker.sock
+  commands:
+    # Cleanup any remaining test containers
+    - docker stop rickroll-test-${DRONE_BUILD_NUMBER} 2>/dev/null || true
+    - docker rm rickroll-test-${DRONE_BUILD_NUMBER} 2>/dev/null || true
+    # Remove test image
+    - docker rmi rickroll:test 2>/dev/null || true
+  depends_on:
+    - test-container
+  when:
+    status: [ success, failure ]
+
+- name: Build and Push Production
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
@@ -26,7 +121,7 @@ steps:
     use_cache: true
     build_args: BUILDKIT_INLINE_CACHE=1
     cache_from: "${DRONE_REPO}:latest"
-    platforms: # if it doesn't work run docker run --privileged --rm tonistiigi/binfmt --install all
+    platforms:
       - linux/amd64
       - linux/arm64/v8
     username:
@@ -35,6 +130,8 @@ steps:
       from_secret: docker_password
     tags:
       - latest
+  depends_on:
+    - test-container
 
 - name: pushrm-dockerhub
   image: chko/docker-pushrm
@@ -49,6 +146,8 @@ steps:
   when:
     status:
       - success
+  depends_on:
+    - Build and Push Production
 
 - name: slack
   image: themaz/drone-slack
@@ -57,6 +156,13 @@ steps:
       from_secret: slack_hook
   when:
     status: [ success, failure ]
+  depends_on:
+    - pushrm-dockerhub
+
+volumes:
+- name: docker
+  host:
+    path: /var/run/docker.sock
 
 trigger:
   event:
