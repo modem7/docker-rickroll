@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:latest
 
-FROM nginxinc/nginx-unprivileged:1.31.1-alpine
+FROM nginxinc/nginx-unprivileged:1.31.2-alpine
 
 USER root
 
