@@ -1,6 +1,22 @@
 name: Publish to GHCR
 
 on:
+  push:
+    branches:
+      - master
+    paths:
+      - Dockerfile
+      - scripts/**
+  # Video content can change (a re-transcode uploaded to the same asset
+  # URLs) without touching git at all, so there's nothing here for the
+  # push trigger above to detect - chain off video-assets.yml finishing
+  # instead, since that's the thing that actually produces new content.
+  workflow_run:
+    workflows: ["Rebuild video release assets"]
+    types:
+      - completed
+    branches:
+      - master
   workflow_dispatch:
 
 permissions:
@@ -9,6 +25,10 @@ permissions:
 
 jobs:
   publish:
+    # workflow_run fires regardless of whether the triggering workflow
+    # actually succeeded - skip publishing a build off a failed/partial
+    # transcode. Push and manual triggers aren't affected by this check.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

@@ -1,5 +1,11 @@
 ---
 
+# Bumped by video-assets.yml after a successful re-transcode, purely to
+# produce a real commit on this path - the video content itself can
+# change (re-uploaded to the same asset URLs) without any other diff
+# here for the paths filter below to detect otherwise.
+# Last video refresh: never
+
 kind: pipeline
 type: docker
 name: build-480p
@@ -49,9 +55,29 @@ steps:
   depends_on:
     - Lint Dockerfile
 
+# Drone is wired up as a plain GitHub repo webhook (Settings > Webhooks),
+# so "push" here just means whatever push events that webhook forwards -
+# nothing Drone-specific to configure on the GitHub side. Auto-builds on
+# every push to master that actually touches the shipped image
+# (Dockerfile/scripts) or a resolution's VIDEO_URL (.drone.yml itself) -
+# a README-only or CI-config-only commit won't trigger a rebuild. When
+# the video changes without any of those (a re-transcode uploaded to the
+# same asset URL), .github/workflows/video-assets.yml bumps the "Last
+# video refresh" marker at the top of this file and pushes that commit,
+# which is a real touch of .drone.yml and flows through the same webhook.
+# "custom" is kept so a rebuild can still be forced manually (Drone UI or
+# API) any time, independent of either push path.
 trigger:
+  branch:
+    - master
   event:
+    - push
     - custom
+  paths:
+    include:
+      - Dockerfile
+      - scripts/**
+      - .drone.yml
 
 ---
 
@@ -96,8 +122,16 @@ steps:
     - Lint Dockerfile
 
 trigger:
+  branch:
+    - master
   event:
+    - push
     - custom
+  paths:
+    include:
+      - Dockerfile
+      - scripts/**
+      - .drone.yml
 
 ---
 
@@ -142,8 +176,16 @@ steps:
     - Lint Dockerfile
 
 trigger:
+  branch:
+    - master
   event:
+    - push
     - custom
+  paths:
+    include:
+      - Dockerfile
+      - scripts/**
+      - .drone.yml
 
 ---
 
@@ -188,8 +230,16 @@ steps:
     - Lint Dockerfile
 
 trigger:
+  branch:
+    - master
   event:
+    - push
     - custom
+  paths:
+    include:
+      - Dockerfile
+      - scripts/**
+      - .drone.yml
 
 ---
 
@@ -235,8 +285,15 @@ steps:
   depends_on:
     - pushrm-dockerhub
 
+# No paths filter here on purpose - this pipeline doesn't build anything
+# itself, it only runs after the four build-* pipelines above (which do
+# have the filter), so it's already implicitly gated by whether those
+# ran for this particular push.
 trigger:
+  branch:
+    - master
   event:
+    - push
     - custom
   status:
     - success

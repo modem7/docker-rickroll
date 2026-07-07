@@ -58,3 +58,29 @@ jobs:
           gh release upload "${{ inputs.release_tag }}" \
             "video-${{ matrix.resolution }}p.mp4" \
             --repo "${{ github.repository }}" --clobber
+
+  # Video content can change (a re-transcode uploaded to the same asset
+  # URLs) without any git diff at all, so there's nothing for Drone's own
+  # push-triggered webhook (Settings > Webhooks in this repo) to detect.
+  # Rather than talking to Drone directly (a separate token/API to
+  # manage), just bump the marker comment at the top of .drone.yml and
+  # push it - .drone.yml is already in every pipeline's paths filter, so
+  # this is a normal push that flows through the exact same webhook the
+  # Dockerfile/scripts-triggered builds already use.
+  trigger-drone:
+    needs: transcode
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          ref: master
+
+      - name: Bump video refresh marker and push
+        run: |
+          sed -i "s/# Last video refresh:.*/# Last video refresh: $(date -u +%Y-%m-%dT%H:%M:%SZ)/" .drone.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .drone.yml
+          git commit -m "Bump video refresh marker to trigger a Drone rebuild"
+          git push origin master
