@@ -55,3 +55,10 @@ jobs:
           build-args: |
             ${{ matrix.video_url != '' && format('VIDEO_URL={0}', matrix.video_url) || '' }}
           tags: ${{ matrix.tags }}
+          # Scoped per resolution so the four matrix legs (different
+          # VIDEO_URL/content each) don't stomp on each other's cache.
+          # mode=max also caches the video-fetch stage, not just the
+          # final image, so re-runs skip re-downloading the video
+          # asset entirely when VIDEO_URL hasn't changed.
+          cache-from: type=gha,scope=${{ matrix.resolution }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.resolution }}
