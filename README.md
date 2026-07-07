@@ -28,7 +28,8 @@ Also published to GHCR if you'd rather pull from there: `ghcr.io/modem7/docker-r
 
 # How it works
 
-- Every browser autoplays a muted video with zero restrictions, but every browser also actively refuses to let a page play sound without a genuine click/tap/keypress first - there's no trick or workaround for this, it's a deliberately and increasingly strictly enforced policy (the same reason YouTube and every other site with audio needs a click too). So the video autoplays muted immediately, and a decoy overlay - a fake cookie-consent banner or a fake "Something went wrong" site error, picked at random per visit (or forced via `OVERLAY`) - entices that first click, which is all it takes to unmute.
+- Every browser autoplays a muted video with zero restrictions, but every browser also actively refuses to let a page play sound without a genuine click/tap/keypress first - there's no trick or workaround for this, it's a deliberately and increasingly strictly enforced policy (the same reason YouTube and every other site with audio needs a click too). So the video autoplays muted immediately, and a decoy - a fake cookie-consent banner, a fake "Something went wrong" site error, or a stuck-loading spinner - entices that first click, which is all it takes to unmute.
+- The video keeps loading/playing muted in the background the whole time so it's instantly ready, but it's completely covered by the decoy (a generic "boring website still loading" backdrop behind the cookie banner/site error, or the loading spinner's own dark screen) until the reveal - nothing looks suspicious, and nothing gives it away early.
 - Only genuine clicks/taps/keypresses count for this - deliberately not mouse movement or scrolling, since browsers don't count those as real interaction either, and unmuting off one of those just gets the video paused by the browser's autoplay enforcement instead of actually unmuted.
 - The video is served through nginx's mp4 module, so seeking/scrubbing and byte-range requests work properly and responses are cached.
 - The video isn't stored in git. It's fetched from a GitHub Release asset at build time and baked into the image, so the shipped container is still fully self-contained and works offline - git just doesn't carry the binary around.
@@ -52,7 +53,15 @@ All tags are built from the same image - only the baked-in video resolution diff
 | Variable | Description | Default |
 | :----: | --- | --- |
 | PORT | Changes the port nginx is listening on. | 8080 |
-| OVERLAY | Which decoy overlay entices the first click - `random`, `cookie`, or `error`. | random |
+| OVERLAY | Which decoy(s) can entice the first click - a comma-separated list from `cookie`, `error`, `loading`, one is picked at random per visit. Set to a single value (e.g. `cookie`) to always use just that one. | all three |
+| TITLE | Browser tab title shown once the video is revealed (after the first click/keypress/etc). | Rickroll |
+| PRE_TITLE | Browser tab title shown before the video is revealed. | Loading... |
+| HEADLINE | Optional heading rendered over the revealed video (e.g. a caption). Leave unset to omit it. | (none) |
+| HEIGHT | CSS height of the video element. | 100vh |
+| WIDTH | CSS width of the video element. | 100% |
+| OBJECT_FIT | CSS `object-fit` value for the video (`cover`, `contain`, etc). | cover |
+| LOOP | Whether the video loops (`true`/`false`). | true |
+| VIDEO_FILE | Filename of the video to serve, relative to the web root. | video.mp4 |
 
 # Configuration example
 

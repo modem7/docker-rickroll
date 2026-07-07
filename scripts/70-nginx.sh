@@ -3,6 +3,7 @@
 set -eu
 
 PORT="${PORT:-"8080"}"
+VIDEO_FILE="${VIDEO_FILE:-"video.mp4"}"
 
 # Create nginx conf with port variable
 tee /etc/nginx/nginx.conf << 'EOF' >/dev/null
@@ -52,7 +53,7 @@ http {
         # sendfile - no need to proxy back to ourselves through
         # proxy_cache/slice, since there's no remote/slow origin here,
         # just a local file.
-        location = /video.mp4 {
+        location = /${VIDEO_FILE} {
             mp4;
             mp4_buffer_size     1M;
             mp4_max_buffer_size 20M;
@@ -85,8 +86,9 @@ server {
 }
 EOF
 
-# Apply port variable
+# Apply port and video filename variables
 sed -i s/'${PORT}'/${PORT}/g /etc/nginx/nginx.conf
+sed -i s#'${VIDEO_FILE}'#"${VIDEO_FILE}"#g /etc/nginx/nginx.conf
 
 echo ""
 echo "#####################"
