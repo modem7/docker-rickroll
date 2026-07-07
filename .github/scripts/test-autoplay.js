@@ -1,7 +1,6 @@
 const { chromium } = require('playwright');
 
 const CONFIG = {
-  cookie: { overlaySelector: '#cookie-banner', clickSelector: '#cookie-banner button' },
   error: { overlaySelector: '#site-error', clickSelector: '#site-error button' },
   loading: { overlaySelector: '#loading-screen', clickSelector: 'body' }
 };
@@ -11,6 +10,7 @@ if (!CONFIG[overlayType]) {
   throw new Error(`usage: node test-autoplay.js <${Object.keys(CONFIG).join('|')}>, got "${overlayType}"`);
 }
 const { overlaySelector, clickSelector } = CONFIG[overlayType];
+const cookieSelector = '#cookie-banner';
 
 async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {}) {
   const start = Date.now();
@@ -36,15 +36,17 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
     throw new Error('expected video to start autoplaying (muted) within 5s, but it never left the paused state');
   }
 
-  const initial = await page.evaluate((sel) => {
+  const initial = await page.evaluate((sel, cookieSel) => {
     const v = document.getElementById('video');
     const overlay = document.querySelector(sel);
+    const cookie = document.querySelector(cookieSel);
     return {
       muted: v.muted,
       title: document.title,
-      overlayVisible: overlay ? !overlay.classList.contains('hidden') : null
+      overlayVisible: overlay ? !overlay.classList.contains('hidden') : null,
+      cookieVisible: cookie ? !cookie.classList.contains('hidden') : null
     };
-  }, overlaySelector);
+  }, overlaySelector, cookieSelector);
 
   if (!initial.muted) {
     throw new Error(`expected video to start muted, got muted=${initial.muted}`);
@@ -54,6 +56,11 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
   }
   if (!initial.overlayVisible) {
     throw new Error(`expected the ${overlayType} overlay to be visible, but it wasn't`);
+  }
+  // The cookie banner is site chrome, not a page state - it should always
+  // be there regardless of which page state (loading/error) is showing.
+  if (!initial.cookieVisible) {
+    throw new Error(`expected the cookie banner to be visible alongside ${overlayType}, but it wasn't`);
   }
 
   await page.click(clickSelector);
@@ -66,15 +73,17 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
     throw new Error('expected video to unmute after clicking within 5s, but it is still muted');
   }
 
-  const after = await page.evaluate((sel) => {
+  const after = await page.evaluate((sel, cookieSel) => {
     const v = document.getElementById('video');
     const overlay = document.querySelector(sel);
+    const cookie = document.querySelector(cookieSel);
     return {
       paused: v.paused,
       title: document.title,
-      overlayVisible: overlay ? !overlay.classList.contains('hidden') : null
+      overlayVisible: overlay ? !overlay.classList.contains('hidden') : null,
+      cookieVisible: cookie ? !cookie.classList.contains('hidden') : null
     };
-  }, overlaySelector);
+  }, overlaySelector, cookieSelector);
 
   if (after.paused) {
     throw new Error('expected video to still be playing after unmuting');
@@ -85,8 +94,11 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
   if (after.overlayVisible) {
     throw new Error(`expected the ${overlayType} overlay to be hidden after clicking, but it is still visible`);
   }
+  if (after.cookieVisible) {
+    throw new Error('expected the cookie banner to be hidden after clicking, but it is still visible');
+  }
 
-  console.log(`OK: ${overlayType} overlay shown, video autoplays muted, and clicking unmutes + hides the overlay`);
+  console.log(`OK: ${overlayType} overlay + cookie banner shown, video autoplays muted, and clicking unmutes + hides both`);
   await browser.close();
 })().catch((err) => {
   console.error(err);

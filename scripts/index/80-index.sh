@@ -314,7 +314,14 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
             var headline = document.getElementById('headline');
             var title = "$TITLE";
 
-            var validTypes = ['cookie', 'error', 'loading'];
+            // "loading" and "error" are mutually exclusive page states - a
+            // page can't be both at once - so one of those two is picked
+            // at random. The cookie banner isn't a page state, it's site
+            // chrome that would realistically show up regardless of what
+            // the page underneath is doing, so it's always shown on top
+            // of whichever one gets picked, rather than being a third
+            // option that could be picked instead of them.
+            var validTypes = ['error', 'loading'];
             var configured = "$OVERLAY".split(',').map(function (s) { return s.trim(); })
                 .filter(function (s) { return validTypes.indexOf(s) !== -1; });
             var enabled = configured.length > 0 ? configured : validTypes;
@@ -324,6 +331,8 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
             var loadingScreen = document.getElementById('loading-screen');
             var cookieBanner = document.getElementById('cookie-banner');
             var siteError = document.getElementById('site-error');
+
+            cookieBanner.classList.remove('hidden');
 
             if (choice === 'loading') {
                 loadingScreen.classList.remove('hidden');
@@ -335,7 +344,7 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
                 }, 3000);
             } else {
                 siteBackdrop.classList.remove('hidden');
-                (choice === 'cookie' ? cookieBanner : siteError).classList.remove('hidden');
+                siteError.classList.remove('hidden');
             }
 
             var events = ['click', 'keydown', 'touchstart', 'pointerdown'];

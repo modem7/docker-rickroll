@@ -118,7 +118,7 @@ jobs:
             -e OBJECT_FIT=contain \
             -e LOOP=false \
             -e VIDEO_FILE=custom.mp4 \
-            -e OVERLAY=cookie,loading \
+            -e OVERLAY=error,loading \
             rickroll:test
 
       - name: Wait for custom container to be healthy
@@ -145,7 +145,7 @@ jobs:
             echo "unexpected loop attribute present with LOOP=false"
             exit 1
           fi
-          echo "$html" | grep -q '"cookie,loading".split'
+          echo "$html" | grep -q '"error,loading".split'
 
       - name: Stop custom container
         run: docker rm -f rickroll-custom
@@ -161,25 +161,6 @@ jobs:
           npm install --no-save playwright@1
           npx playwright install --with-deps chromium
 
-      - name: Start container with OVERLAY=cookie
-        run: docker run -d --name rickroll-cookie -p 8080:8080 -e OVERLAY=cookie rickroll:test
-
-      - name: Wait for OVERLAY=cookie container to be healthy
-        run: |
-          for i in $(seq 1 30); do
-            docker exec rickroll-cookie curl -fsS http://localhost:9090/healthz && exit 0
-            sleep 1
-          done
-          docker logs rickroll-cookie
-          exit 1
-
-      - name: Verify cookie-banner overlay autoplays muted and unmutes on click
-        run: node .github/scripts/test-autoplay.js cookie
-
-      - name: Stop OVERLAY=cookie container
-        if: always()
-        run: docker rm -f rickroll-cookie || true
-
       - name: Start container with OVERLAY=error
         run: docker run -d --name rickroll-error -p 8080:8080 -e OVERLAY=error rickroll:test
 
@@ -192,7 +173,7 @@ jobs:
           docker logs rickroll-error
           exit 1
 
-      - name: Verify site-error overlay autoplays muted and unmutes on click
+      - name: Verify site-error + cookie banner autoplay muted and unmute on click
         run: node .github/scripts/test-autoplay.js error
 
       - name: Stop OVERLAY=error container
@@ -211,7 +192,7 @@ jobs:
           docker logs rickroll-loading
           exit 1
 
-      - name: Verify loading-screen overlay autoplays muted and unmutes on click
+      - name: Verify loading-screen + cookie banner autoplay muted and unmute on click
         run: node .github/scripts/test-autoplay.js loading
 
       - name: Stop OVERLAY=loading container
