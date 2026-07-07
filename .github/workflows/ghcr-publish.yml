@@ -1,0 +1,57 @@
+name: Publish to GHCR
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - resolution: 480p
+            video_url: https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-480p.mp4
+            tags: ghcr.io/${{ github.repository }}:480p
+          - resolution: 720p
+            video_url: https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-720p.mp4
+            tags: ghcr.io/${{ github.repository }}:720p
+          - resolution: 1080p
+            video_url: ""
+            tags: |
+              ghcr.io/${{ github.repository }}:latest
+              ghcr.io/${{ github.repository }}:1080p
+          - resolution: 2160p
+            video_url: https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-2160p.mp4
+            tags: ghcr.io/${{ github.repository }}:2160p
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push ${{ matrix.resolution }}
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64/v8
+          build-args: |
+            ${{ matrix.video_url != '' && format('VIDEO_URL={0}', matrix.video_url) || '' }}
+          tags: ${{ matrix.tags }}

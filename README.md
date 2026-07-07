@@ -16,6 +16,16 @@ This is a self-hosted Rickroll container. Point someone at it - a link, a QR cod
 
 Image is based on nginxinc/nginx-unprivileged, runs as a non-root user, and everything needed to serve the video is baked into the image at build time - no external dependencies at runtime.
 
+# Quick start
+
+```bash
+docker run -d -p 8080:8080 --name rickroll modem7/docker-rickroll
+```
+
+Then visit `http://localhost:8080` - see the [Configuration example](#configuration-example) below for a docker-compose version.
+
+Also published to GHCR if you'd rather pull from there: `ghcr.io/modem7/docker-rickroll`.
+
 # How it works
 
 - Every request gets sent straight to the raw video file instead of an HTML page with a `<video>` tag embedded in it. Browsers gate unmuted autoplay on an embedded `<video>` element behind a genuine user gesture (a click/tap/keypress) - but a directly-navigated media file goes through the browser's own native media-document viewer instead, which autoplays with sound with zero interaction required. That's the whole trick, and why there's no "click to unmute" moment.
