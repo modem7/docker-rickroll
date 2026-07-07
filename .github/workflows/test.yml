@@ -49,6 +49,9 @@ jobs:
         run: |
           set -eu
           headers=$(curl -sS -o /dev/null -D - http://localhost:8080/)
+          echo "--- headers received ---"
+          echo "$headers"
+          echo "------------------------"
           echo "$headers" | grep -qE '^HTTP/[0-9.]+ 302'
           echo "$headers" | grep -qi '^location: */video\.mp4'
 
