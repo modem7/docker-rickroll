@@ -1,6 +1,12 @@
 name: Publish to GHCR
 
 on:
+  push:
+    branches:
+      - master
+    paths:
+      - Dockerfile
+      - scripts/**
   workflow_dispatch:
 
 permissions:

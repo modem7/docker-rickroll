@@ -49,9 +49,21 @@ steps:
   depends_on:
     - Lint Dockerfile
 
+# Auto-builds on every push to master that actually touches the shipped
+# image (Dockerfile/scripts) - a README-only or CI-config-only commit
+# won't trigger a rebuild. "custom" is kept so a rebuild can still be
+# forced manually (e.g. to pick up a new video asset) without a code
+# change to hang it on.
 trigger:
+  branch:
+    - master
   event:
+    - push
     - custom
+  paths:
+    include:
+      - Dockerfile
+      - scripts/**
 
 ---
 
@@ -96,8 +108,15 @@ steps:
     - Lint Dockerfile
 
 trigger:
+  branch:
+    - master
   event:
+    - push
     - custom
+  paths:
+    include:
+      - Dockerfile
+      - scripts/**
 
 ---
 
@@ -142,8 +161,15 @@ steps:
     - Lint Dockerfile
 
 trigger:
+  branch:
+    - master
   event:
+    - push
     - custom
+  paths:
+    include:
+      - Dockerfile
+      - scripts/**
 
 ---
 
@@ -188,8 +214,15 @@ steps:
     - Lint Dockerfile
 
 trigger:
+  branch:
+    - master
   event:
+    - push
     - custom
+  paths:
+    include:
+      - Dockerfile
+      - scripts/**
 
 ---
 
@@ -235,8 +268,15 @@ steps:
   depends_on:
     - pushrm-dockerhub
 
+# No paths filter here on purpose - this pipeline doesn't build anything
+# itself, it only runs after the four build-* pipelines above (which do
+# have the filter), so it's already implicitly gated by whether those
+# ran for this particular push.
 trigger:
+  branch:
+    - master
   event:
+    - push
     - custom
   status:
     - success
