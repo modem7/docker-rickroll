@@ -161,7 +161,11 @@ jobs:
         run: |
           npm init -y >/dev/null
           npm install --no-save playwright@1
-          npx playwright install --with-deps chromium
+          # Firefox gets its own engine check alongside Chromium - it's
+          # historically the most divergent on autoplay/gesture policy
+          # enforcement of the mainstream browsers, so a bug that's fine
+          # under one can still be broken under the other.
+          npx playwright install --with-deps chromium firefox
 
       - name: Start container with OVERLAY=error
         run: docker run -d --name rickroll-error -p 8080:8080 -e OVERLAY=error rickroll:test
@@ -175,8 +179,11 @@ jobs:
           docker logs rickroll-error
           exit 1
 
-      - name: Verify site-error + cookie banner autoplay muted and unmute on click
-        run: node .github/scripts/test-autoplay.js error
+      - name: Verify site-error + cookie banner autoplay muted and unmute on click (Chromium)
+        run: node .github/scripts/test-autoplay.js error chromium
+
+      - name: Verify site-error + cookie banner autoplay muted and unmute on click (Firefox)
+        run: node .github/scripts/test-autoplay.js error firefox
 
       - name: Stop OVERLAY=error container
         if: always()
@@ -194,8 +201,11 @@ jobs:
           docker logs rickroll-loading
           exit 1
 
-      - name: Verify loading-screen + cookie banner autoplay muted and unmute on click
-        run: node .github/scripts/test-autoplay.js loading
+      - name: Verify loading-screen + cookie banner autoplay muted and unmute on click (Chromium)
+        run: node .github/scripts/test-autoplay.js loading chromium
+
+      - name: Verify loading-screen + cookie banner autoplay muted and unmute on click (Firefox)
+        run: node .github/scripts/test-autoplay.js loading firefox
 
       - name: Stop OVERLAY=loading container
         if: always()
