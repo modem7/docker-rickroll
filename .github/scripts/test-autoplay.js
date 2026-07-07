@@ -14,6 +14,10 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
   const page = await browser.newPage();
   await page.goto('http://localhost:8080/', { waitUntil: 'load' });
 
+  if (!page.url().endsWith('/video.mp4')) {
+    throw new Error(`expected to be redirected straight to /video.mp4, ended up at ${page.url()}`);
+  }
+
   // Autoplay isn't instantaneous - the browser needs a moment to buffer
   // before playback actually begins, so poll rather than checking once.
   const startedPlaying = await waitFor(page, () => {
@@ -21,42 +25,21 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
     return !!v && !v.paused;
   });
   if (!startedPlaying) {
-    throw new Error('expected video to start autoplaying (muted) within 5s, but it never left the paused state');
+    throw new Error('expected video to start playing within 5s, but it never left the paused state');
   }
 
-  const initial = await page.evaluate(() => {
+  const state = await page.evaluate(() => {
     const v = document.querySelector('video');
-    return { muted: v.muted, title: document.title };
+    return { muted: v.muted, paused: v.paused };
   });
-  if (!initial.muted) {
-    throw new Error(`expected video to start muted, got muted=${initial.muted}`);
+  if (state.muted) {
+    throw new Error('expected the video to be playing WITH sound with zero interaction, but it is muted');
   }
-  if (initial.title !== 'Loading...') {
-    throw new Error(`expected initial title "Loading...", got "${initial.title}"`);
-  }
-
-  await page.mouse.move(100, 100);
-
-  const unmuted = await waitFor(page, () => {
-    const v = document.querySelector('video');
-    return !!v && !v.muted;
-  });
-  if (!unmuted) {
-    throw new Error('expected video to unmute after mouse movement within 5s, but it is still muted');
+  if (state.paused) {
+    throw new Error('expected the video to still be playing');
   }
 
-  const after = await page.evaluate(() => {
-    const v = document.querySelector('video');
-    return { paused: v.paused, title: document.title };
-  });
-  if (after.paused) {
-    throw new Error('expected video to still be playing after unmuting');
-  }
-  if (after.title !== 'Rickroll') {
-    throw new Error(`expected title "Rickroll" after interaction, got "${after.title}"`);
-  }
-
-  console.log('OK: video autoplays muted and unmutes on first interaction');
+  console.log('OK: video autoplays with sound immediately, no interaction required');
   await browser.close();
 })().catch((err) => {
   console.error(err);

@@ -41,27 +41,28 @@ http {
         listen       ${PORT};
 
         root /usr/share/nginx/html;
-        index index.html;
 
-        # Make site accessible from http://localhost/
         server_name _;
 
-        error_page 404 /index.html;
-
-        location ~ \.mp4$ {
-            # nginx's own mp4 pseudo-streaming module plus native Range
-            # support already handle seeking/scrubbing efficiently via
-            # sendfile - no need to proxy back to ourselves through
-            # proxy_cache/slice, since there's no remote/slow origin here,
-            # just a local file.
+        # Send every request straight to the raw video file instead of an
+        # HTML page embedding a <video> tag. Browsers gate unmuted autoplay
+        # on an embedded <video> element behind a genuine user gesture (a
+        # click/tap/keypress) - but a directly-navigated media file goes
+        # through the browser's native media-document viewer instead,
+        # which autoplays with sound with zero interaction required. This
+        # is why this container never has a "click to unmute" moment.
+        location = /video.mp4 {
             mp4;
             mp4_buffer_size     1M;
             mp4_max_buffer_size 20M;
 
             add_header Accept-Ranges bytes;
 
-            # enable thread pool so large reads don't block the event loop
             aio threads=default;
+        }
+
+        location / {
+            return 302 /video.mp4;
         }
     }
 }

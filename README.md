@@ -12,13 +12,13 @@
 
 More info can be found [here](https://www.youtube.com/watch?v=dQw4w9WgXcQ).
 
-This is a self-hosted Rickroll container. Point someone at it - a link, a QR code, whatever your heart desires - and they get properly rickrolled: full video and audio of Rick Astley, autoplaying in any modern browser. No plugins, no "click to unmute" button, no redirect tricks - it just plays.
+This is a self-hosted Rickroll container. Point someone at it - a link, a QR code, whatever your heart desires - and they get properly rickrolled: full video and audio of Rick Astley, autoplaying immediately with no interaction required. No plugins, no "click to unmute" button.
 
 Image is based on nginxinc/nginx-unprivileged, runs as a non-root user, and everything needed to serve the video is baked into the image at build time - no external dependencies at runtime.
 
 # How it works
 
-- The page autoplays the video muted (every browser allows this), then unmutes itself on the first interaction - a click, a keypress, even just moving the mouse. In practice, sound kicks in within a fraction of a second, with no visible prompt.
+- Every request gets sent straight to the raw video file instead of an HTML page with a `<video>` tag embedded in it. Browsers gate unmuted autoplay on an embedded `<video>` element behind a genuine user gesture (a click/tap/keypress) - but a directly-navigated media file goes through the browser's own native media-document viewer instead, which autoplays with sound with zero interaction required. That's the whole trick, and why there's no "click to unmute" moment.
 - The video is served through nginx's mp4 module, so seeking/scrubbing and byte-range requests work properly and responses are cached.
 - The video isn't stored in git. It's fetched from a GitHub Release asset at build time and baked into the image, so the shipped container is still fully self-contained and works offline - git just doesn't carry the binary around.
 - Built for both linux/amd64 and linux/arm64/v8.
@@ -41,14 +41,6 @@ All tags are built from the same image - only the baked-in video resolution diff
 | Variable | Description | Default |
 | :----: | --- | --- |
 | PORT | Changes the port nginx is listening on. | 8080 |
-| TITLE | Browser tab title shown once the video is revealed (after the first click/keypress/etc). | Rickroll |
-| PRE_TITLE | Browser tab title shown before the video is revealed. | Loading... |
-| HEADLINE | Optional heading rendered over the video (e.g. a caption). Leave unset to omit it. | (none) |
-| HEIGHT | CSS height of the video element. | 100vh |
-| WIDTH | CSS width of the video element. | 100% |
-| OBJECT_FIT | CSS `object-fit` value for the video (`cover`, `contain`, etc). | cover |
-| LOOP | Whether the video loops (`true`/`false`). | true |
-| VIDEO_FILE | Filename of the video to serve, relative to the web root. | video.mp4 |
 
 # Configuration example
 
