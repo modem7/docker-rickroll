@@ -31,6 +31,11 @@ Image is based on nginxinc/nginx-unprivileged, runs as a non-root user, and ever
 | Tag | Description |
 | :----: | --- |
 | latest | Video starts automatically. 1080p AI remaster. |
+| 2160p | Same as latest, at the native 4K resolution. |
+| 720p | Same as latest, downscaled to save bandwidth/storage. |
+| 480p | Same as latest, downscaled further still. |
+
+All tags are built from the same image - only the baked-in video resolution differs.
 
 # Environment Variables
 | Variable | Description | Default |
