@@ -25,6 +25,11 @@ ARG GID=101
 # Copy files into image
 COPY --link --from=video /video/video.mp4 /usr/share/nginx/html/video.mp4
 COPY --link --chmod=755 scripts/*.sh /docker-entrypoint.d/
+COPY --link --chmod=755 scripts/index/80-index.sh /docker-entrypoint.d/
+
+# Change permissions to index.html so the non-root entrypoint can
+# overwrite it at container start
+RUN chown $UID:0 /usr/share/nginx/html/index.html
 
 # Document what port is required
 EXPOSE 8080

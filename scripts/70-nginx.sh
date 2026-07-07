@@ -37,32 +37,21 @@ http {
     gzip_vary on;
     gzip_http_version 1.1;
 
-    # Redirects must reflect what the client actually connected to, not
-    # nginx's own internal scheme/port - otherwise a reverse proxy that
-    # terminates TLS on 443 and forwards to some other internal port (e.g.
-    # Traefik) ends up with that internal port leaking into the Location
-    # header. Trust X-Forwarded-Proto when a proxy sets it, otherwise fall
-    # back to nginx's own scheme for direct (non-proxied) access.
-    map $http_x_forwarded_proto $redirect_scheme {
-        default $scheme;
-        https   https;
-        http    http;
-    }
-
     server {
         listen       ${PORT} default_server;
 
         root /usr/share/nginx/html;
+        index index.html;
 
         server_name _;
 
-        # Send every request straight to the raw video file instead of an
-        # HTML page embedding a <video> tag. Browsers gate unmuted autoplay
-        # on an embedded <video> element behind a genuine user gesture (a
-        # click/tap/keypress) - but a directly-navigated media file goes
-        # through the browser's native media-document viewer instead,
-        # which autoplays with sound with zero interaction required. This
-        # is why this container never has a "click to unmute" moment.
+        error_page 404 /index.html;
+
+        # nginx's own mp4 pseudo-streaming module plus native Range
+        # support already handle seeking/scrubbing efficiently via
+        # sendfile - no need to proxy back to ourselves through
+        # proxy_cache/slice, since there's no remote/slow origin here,
+        # just a local file.
         location = /video.mp4 {
             mp4;
             mp4_buffer_size     1M;
@@ -71,10 +60,6 @@ http {
             add_header Accept-Ranges bytes;
 
             aio threads=default;
-        }
-
-        location / {
-            return 302 $redirect_scheme://$http_host/video.mp4;
         }
     }
 }

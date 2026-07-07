@@ -45,38 +45,30 @@ jobs:
           docker logs rickroll-default
           exit 1
 
-      - name: Check root redirects straight to the video
+      - name: Check index page structure
         run: |
           set -eu
-          headers=$(curl -sS -o /dev/null -D - http://localhost:8080/)
-          echo "$headers" | grep -qE '^HTTP/[0-9.]+ 302'
-          echo "$headers" | grep -qiE '^location: *http://localhost:8080/video\.mp4'
-
-      - name: Check an arbitrary path also redirects to the video
-        run: |
-          set -eu
-          headers=$(curl -sS -o /dev/null -D - http://localhost:8080/some/random/path)
-          echo "$headers" | grep -qE '^HTTP/[0-9.]+ 302'
-          echo "$headers" | grep -qiE '^location: *http://localhost:8080/video\.mp4'
-
-      - name: Check redirect doesn't leak nginx's own port behind a reverse proxy
-        run: |
-          set -eu
-          # Simulates Traefik/nginx-proxy terminating TLS on 443 and forwarding
-          # to this container's internal port - the Location header must
-          # reflect the client-facing host/scheme, not nginx's own listen port.
-          headers=$(curl -sS -o /dev/null -D - \
-            -H "Host: rickroll.example.com" \
-            -H "X-Forwarded-Proto: https" \
-            http://localhost:8080/)
-          echo "$headers" | grep -qE '^HTTP/[0-9.]+ 302'
-          echo "$headers" | grep -qiE '^location: *https://rickroll\.example\.com/video\.mp4'
+          html=$(curl -fsS http://localhost:8080/)
+          echo "$html" | grep -q '<title>Loading...</title>'
+          echo "$html" | grep -qE '<video id="video"[^>]*\bautoplay\b'
+          echo "$html" | grep -qE '<video id="video"[^>]*\bmuted\b'
+          echo "$html" | grep -q 'source src="video.mp4"'
+          echo "$html" | grep -q 'id="cookie-banner"'
+          echo "$html" | grep -q 'id="site-error"'
 
       - name: Check video file is actually served
         run: |
           headers=$(curl -sS -o /dev/null -D - http://localhost:8080/video.mp4)
           echo "$headers" | grep -qE '^HTTP/[0-9.]+ 200'
           echo "$headers" | grep -qi '^content-type: *video/mp4'
+
+      - name: Check an arbitrary path also serves the page (any URL rickrolls you)
+        run: |
+          set -eu
+          status=$(curl -sS -o /dev/null -w '%{http_code}' http://localhost:8080/some/random/path)
+          [ "$status" = "404" ]
+          html=$(curl -sS http://localhost:8080/some/random/path)
+          echo "$html" | grep -q 'id="video"'
 
       - name: Check container runs as non-root
         run: |
@@ -114,18 +106,6 @@ jobs:
       - name: Stop custom PORT container
         run: docker rm -f rickroll-port
 
-      - name: Start container for browser test
-        run: docker run -d --name rickroll-browser -p 8080:8080 rickroll:test
-
-      - name: Wait for browser-test container to be healthy
-        run: |
-          for i in $(seq 1 30); do
-            docker exec rickroll-browser curl -fsS http://localhost:9090/healthz && exit 0
-            sleep 1
-          done
-          docker logs rickroll-browser
-          exit 1
-
       - name: Set up Node
         uses: actions/setup-node@v6
         with:
@@ -137,9 +117,40 @@ jobs:
           npm install --no-save playwright@1
           npx playwright install --with-deps chromium
 
-      - name: Verify video autoplays with sound with zero interaction
-        run: node .github/scripts/test-autoplay.js
+      - name: Start container with OVERLAY=cookie
+        run: docker run -d --name rickroll-cookie -p 8080:8080 -e OVERLAY=cookie rickroll:test
 
-      - name: Stop browser-test container
+      - name: Wait for OVERLAY=cookie container to be healthy
+        run: |
+          for i in $(seq 1 30); do
+            docker exec rickroll-cookie curl -fsS http://localhost:9090/healthz && exit 0
+            sleep 1
+          done
+          docker logs rickroll-cookie
+          exit 1
+
+      - name: Verify cookie-banner overlay autoplays muted and unmutes on click
+        run: node .github/scripts/test-autoplay.js cookie
+
+      - name: Stop OVERLAY=cookie container
         if: always()
-        run: docker rm -f rickroll-browser || true
+        run: docker rm -f rickroll-cookie || true
+
+      - name: Start container with OVERLAY=error
+        run: docker run -d --name rickroll-error -p 8080:8080 -e OVERLAY=error rickroll:test
+
+      - name: Wait for OVERLAY=error container to be healthy
+        run: |
+          for i in $(seq 1 30); do
+            docker exec rickroll-error curl -fsS http://localhost:9090/healthz && exit 0
+            sleep 1
+          done
+          docker logs rickroll-error
+          exit 1
+
+      - name: Verify site-error overlay autoplays muted and unmutes on click
+        run: node .github/scripts/test-autoplay.js error
+
+      - name: Stop OVERLAY=error container
+        if: always()
+        run: docker rm -f rickroll-error || true

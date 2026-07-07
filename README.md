@@ -12,7 +12,7 @@
 
 More info can be found [here](https://www.youtube.com/watch?v=dQw4w9WgXcQ).
 
-This is a self-hosted Rickroll container. Point someone at it - a link, a QR code, whatever your heart desires - and they get properly rickrolled: full video and audio of Rick Astley, autoplaying immediately with no interaction required. No plugins, no "click to unmute" button.
+This is a self-hosted Rickroll container. Point someone at it - a link, a QR code, whatever your heart desires - and they get properly rickrolled: full video and audio of Rick Astley. The video starts playing the instant the page loads; sound kicks in the moment they click anything at all, no matter what it is.
 
 Image is based on nginxinc/nginx-unprivileged, runs as a non-root user, and everything needed to serve the video is baked into the image at build time - no external dependencies at runtime.
 
@@ -28,7 +28,8 @@ Also published to GHCR if you'd rather pull from there: `ghcr.io/modem7/docker-r
 
 # How it works
 
-- Every request gets sent straight to the raw video file instead of an HTML page with a `<video>` tag embedded in it. Browsers gate unmuted autoplay on an embedded `<video>` element behind a genuine user gesture (a click/tap/keypress) - but a directly-navigated media file goes through the browser's own native media-document viewer instead, which autoplays with sound with zero interaction required. That's the whole trick, and why there's no "click to unmute" moment.
+- Every browser autoplays a muted video with zero restrictions, but every browser also actively refuses to let a page play sound without a genuine click/tap/keypress first - there's no trick or workaround for this, it's a deliberately and increasingly strictly enforced policy (the same reason YouTube and every other site with audio needs a click too). So the video autoplays muted immediately, and a decoy overlay - a fake cookie-consent banner or a fake "Something went wrong" site error, picked at random per visit (or forced via `OVERLAY`) - entices that first click, which is all it takes to unmute.
+- Only genuine clicks/taps/keypresses count for this - deliberately not mouse movement or scrolling, since browsers don't count those as real interaction either, and unmuting off one of those just gets the video paused by the browser's autoplay enforcement instead of actually unmuted.
 - The video is served through nginx's mp4 module, so seeking/scrubbing and byte-range requests work properly and responses are cached.
 - The video isn't stored in git. It's fetched from a GitHub Release asset at build time and baked into the image, so the shipped container is still fully self-contained and works offline - git just doesn't carry the binary around.
 - Built for both linux/amd64 and linux/arm64/v8.
@@ -51,6 +52,7 @@ All tags are built from the same image - only the baked-in video resolution diff
 | Variable | Description | Default |
 | :----: | --- | --- |
 | PORT | Changes the port nginx is listening on. | 8080 |
+| OVERLAY | Which decoy overlay entices the first click - `random`, `cookie`, or `error`. | random |
 
 # Configuration example
 
