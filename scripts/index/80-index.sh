@@ -335,7 +335,17 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
                 }
             }
 
-            var events = ['click', 'keydown', 'touchstart', 'pointerdown'];
+            // click fires for both a genuine mouse click and, on
+            // touch devices, the synthetic click a browser dispatches
+            // after a completed tap - deliberately not touchstart or
+            // pointerdown, which fire the instant a finger touches the
+            // screen, before the browser even knows it's a tap and not
+            // the start of a scroll/drag. WebKit in particular doesn't
+            // treat those as a strong enough gesture to permit unmuted
+            // playback, so play() silently gets rejected and the
+            // click that follows never gets a retry since the
+            // listeners here are already torn down.
+            var events = ['click', 'keydown'];
 
             function reveal() {
                 video.muted = false;
