@@ -69,7 +69,7 @@ The video is fetched pre-transcoded from a video asset attached to a [GitHub Rel
 
 | Build Arg | Description | Default |
 | :----: | --- | --- |
-| VIDEO_URL | URL the build downloads the (already-transcoded) video from. | [video-assets-v1/video.mp4](https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video.mp4) (1080p) |
+| VIDEO_URL | URL the build downloads the (already-transcoded) video from. | [video-assets-v1/video-1080p.mp4](https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-1080p.mp4) |
 
 ```bash
 # build the default (1080p, matches the published `latest` tag)
