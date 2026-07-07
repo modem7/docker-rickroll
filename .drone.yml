@@ -108,7 +108,12 @@ steps:
   when:
     status: [ success, failure ]
 
-- name: Build and Push Production
+# Each tag is a separate resolution built from the same already-tested
+# Dockerfile, just pointed at a different pre-transcoded video asset (see
+# .github/workflows/video-assets.yml). They all depend only on
+# test-container, so Drone runs them as a parallel matrix rather than
+# one-after-another.
+- name: Build and Push latest (1080p)
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
@@ -116,7 +121,8 @@ steps:
     purge: true
     compress: true
     use_cache: true
-    build_args: BUILDKIT_INLINE_CACHE=1
+    build_args:
+      - BUILDKIT_INLINE_CACHE=1
     cache_from: "${DRONE_REPO}:latest"
     platforms:
       - linux/amd64
@@ -127,6 +133,78 @@ steps:
       from_secret: docker_password
     tags:
       - latest
+  depends_on:
+    - test-container
+
+- name: Build and Push 2160p
+  image: thegeeklab/drone-docker-buildx
+  privileged: true
+  settings:
+    repo: ${DRONE_REPO}
+    purge: true
+    compress: true
+    use_cache: true
+    build_args:
+      - BUILDKIT_INLINE_CACHE=1
+      - VIDEO_URL=https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-2160p.mp4
+    cache_from: "${DRONE_REPO}:2160p"
+    platforms:
+      - linux/amd64
+      - linux/arm64/v8
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags:
+      - 2160p
+  depends_on:
+    - test-container
+
+- name: Build and Push 720p
+  image: thegeeklab/drone-docker-buildx
+  privileged: true
+  settings:
+    repo: ${DRONE_REPO}
+    purge: true
+    compress: true
+    use_cache: true
+    build_args:
+      - BUILDKIT_INLINE_CACHE=1
+      - VIDEO_URL=https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-720p.mp4
+    cache_from: "${DRONE_REPO}:720p"
+    platforms:
+      - linux/amd64
+      - linux/arm64/v8
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags:
+      - 720p
+  depends_on:
+    - test-container
+
+- name: Build and Push 480p
+  image: thegeeklab/drone-docker-buildx
+  privileged: true
+  settings:
+    repo: ${DRONE_REPO}
+    purge: true
+    compress: true
+    use_cache: true
+    build_args:
+      - BUILDKIT_INLINE_CACHE=1
+      - VIDEO_URL=https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-480p.mp4
+    cache_from: "${DRONE_REPO}:480p"
+    platforms:
+      - linux/amd64
+      - linux/arm64/v8
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags:
+      - 480p
   depends_on:
     - test-container
 
@@ -144,7 +222,10 @@ steps:
     status:
       - success
   depends_on:
-    - Build and Push Production
+    - Build and Push latest (1080p)
+    - Build and Push 2160p
+    - Build and Push 720p
+    - Build and Push 480p
 
 - name: slack
   image: themaz/drone-slack
