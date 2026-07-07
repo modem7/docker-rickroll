@@ -1,4 +1,4 @@
-const { chromium } = require('playwright');
+const playwright = require('playwright');
 
 const CONFIG = {
   error: { overlaySelector: '#site-error', clickSelector: '#site-error button', initialTitle: 'Internal Server Error' },
@@ -7,10 +7,15 @@ const CONFIG = {
 
 const overlayType = process.argv[2];
 if (!CONFIG[overlayType]) {
-  throw new Error(`usage: node test-autoplay.js <${Object.keys(CONFIG).join('|')}>, got "${overlayType}"`);
+  throw new Error(`usage: node test-autoplay.js <${Object.keys(CONFIG).join('|')}> [chromium|firefox|webkit], got "${overlayType}"`);
 }
 const { overlaySelector, clickSelector, initialTitle } = CONFIG[overlayType];
 const cookieSelector = '#cookie-banner';
+
+const browserType = process.argv[3] || 'chromium';
+if (!playwright[browserType]) {
+  throw new Error(`unknown browser engine "${browserType}", expected chromium, firefox, or webkit`);
+}
 
 async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {}) {
   const start = Date.now();
@@ -22,7 +27,7 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
 }
 
 (async () => {
-  const browser = await chromium.launch();
+  const browser = await playwright[browserType].launch();
   const page = await browser.newPage();
   await page.goto('http://localhost:8080/', { waitUntil: 'load' });
 
@@ -102,7 +107,7 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
     throw new Error('expected the cookie banner to be hidden after clicking, but it is still visible');
   }
 
-  console.log(`OK: ${overlayType} overlay + cookie banner shown, video autoplays muted, and clicking unmutes + hides both`);
+  console.log(`OK (${browserType}): ${overlayType} overlay + cookie banner shown, video autoplays muted, and clicking unmutes + hides both`);
   await browser.close();
 })().catch((err) => {
   console.error(err);
