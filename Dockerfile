@@ -3,7 +3,9 @@
 # ---- Fetch the pre-transcoded video. Build-time only - baked into the
 # ---- final image, never stored in git/LFS. Transcoding to the various
 # ---- resolutions happens separately and infrequently, not on every image
-# ---- build (see .github/workflows/video-assets.yml).
+# ---- build (see .github/workflows/video-assets.yml). Rebuilt
+# ---- automatically on every push to master that touches this file (see
+# ---- .github/workflows/ghcr-publish.yml and .drone.yml).
 FROM --platform=$BUILDPLATFORM alpine:3.24 AS video
 
 # hadolint ignore=DL3018
