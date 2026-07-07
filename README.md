@@ -12,7 +12,7 @@
 
 More info can be found [here](https://www.youtube.com/watch?v=dQw4w9WgXcQ).
 
-Point someone at this container and they get video and audio, autoplaying, in any modern browser. No plugins, no "click to unmute" button, no redirect tricks - it just plays.
+This is a self-hosted Rickroll container. Point someone at it - a link, a QR code, whatever your heart desires - and they get properly rickrolled: full video and audio of Rick Astley, autoplaying in any modern browser. No plugins, no "click to unmute" button, no redirect tricks - it just plays.
 
 Image is based on nginxinc/nginx-unprivileged, runs as a non-root user, and everything needed to serve the video is baked into the image at build time - no external dependencies at runtime.
 
@@ -30,10 +30,10 @@ Image is based on nginxinc/nginx-unprivileged, runs as a non-root user, and ever
 # Tags
 | Tag | Description |
 | :----: | --- |
-| 480p | Video starts automatically. Smallest/lowest quality. |
-| 720p | Video starts automatically. |
-| latest / 1080p | Video starts automatically. 1080p AI remaster - `latest` and `1080p` are the same image. |
-| 2160p | Video starts automatically. Native 4K resolution. |
+| 480p | Video starts automatically. 854x480. |
+| 720p | Video starts automatically. 1280x720. |
+| latest / 1080p | Video starts automatically. 1920x1080 - `latest` and `1080p` are the same image. |
+| 2160p | Video starts automatically. 3840x2160. |
 
 All tags are built from the same image - only the baked-in video resolution differs.
 
@@ -49,6 +49,20 @@ All tags are built from the same image - only the baked-in video resolution diff
 | OBJECT_FIT | CSS `object-fit` value for the video (`cover`, `contain`, etc). | cover |
 | LOOP | Whether the video loops (`true`/`false`). | true |
 | VIDEO_FILE | Filename of the video to serve, relative to the web root. | video.mp4 |
+
+# Configuration example
+
+```yaml
+version: "2.4"
+
+services:
+
+  rickroll:
+    image: modem7/docker-rickroll
+    container_name: Rickroll
+    ports:
+      - 8080:8080
+```
 
 # Build Arguments
 The video is fetched pre-transcoded from a video asset attached to a [GitHub Release](https://github.com/modem7/docker-rickroll/releases/tag/video-assets-v1) at build time, rather than being stored in git. This only matters if you're building the image yourself - the published `latest` tag already has it baked in.
@@ -66,17 +80,3 @@ docker build --build-arg VIDEO_URL=https://github.com/modem7/docker-rickroll/rel
 ```
 
 Transcoding (4K master -> 2160p/1080p/720p/480p mp4s) happens separately, via a manually-triggered [GitHub Actions workflow](.github/workflows/video-assets.yml) that runs against the master video and uploads the results back to the Release. It only needs to run when the master video changes, not on every build.
-
-# Configuration example
-
-```yaml
-version: "2.4"
-
-services:
-
-  rickroll:
-    image: modem7/docker-rickroll
-    container_name: Rickroll
-    ports:
-      - 8080:8080
-```
