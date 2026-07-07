@@ -1,10 +1,10 @@
 # Self Hosted, self contained Rickroll container.
 
 ![Docker Pulls](https://img.shields.io/docker/pulls/modem7/docker-rickroll) 
-![Docker Image Size (latest)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/latest?label=latest) 
-![Docker Image Size (2160p)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/2160p?label=2160p) 
-![Docker Image Size (720p)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/720p?label=720p) 
 ![Docker Image Size (480p)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/480p?label=480p) 
+![Docker Image Size (720p)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/720p?label=720p) 
+![Docker Image Size (latest)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/latest?label=latest%2F1080p) 
+![Docker Image Size (2160p)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/2160p?label=2160p) 
 [![Build Status](https://drone.modem7.com/api/badges/modem7/docker-rickroll/status.svg)](https://drone.modem7.com/modem7/docker-rickroll)
 [![GitHub last commit](https://img.shields.io/github/last-commit/modem7/docker-rickroll)](https://github.com/modem7/docker-rickroll)
 
@@ -30,10 +30,10 @@ Image is based on nginxinc/nginx-unprivileged, runs as a non-root user, and ever
 # Tags
 | Tag | Description |
 | :----: | --- |
-| latest | Video starts automatically. 1080p AI remaster. |
-| 2160p | Same as latest, at the native 4K resolution. |
-| 720p | Same as latest, downscaled to save bandwidth/storage. |
-| 480p | Same as latest, downscaled further still. |
+| 480p | Video starts automatically. Smallest/lowest quality. |
+| 720p | Video starts automatically. |
+| latest / 1080p | Video starts automatically. 1080p AI remaster - `latest` and `1080p` are the same image. |
+| 2160p | Video starts automatically. Native 4K resolution. |
 
 All tags are built from the same image - only the baked-in video resolution differs.
 
