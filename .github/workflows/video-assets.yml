@@ -18,6 +18,10 @@ permissions:
 jobs:
   transcode:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        resolution: [480, 720, 1080, 2160]
     steps:
       - name: Install ffmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
@@ -31,31 +35,26 @@ jobs:
             --pattern "${{ inputs.source_asset }}" \
             --output source.input
 
-      - name: Transcode resolutions
+      - name: Transcode
+        run: |
+          ffmpeg -y -i source.input -vf "scale=-2:${{ matrix.resolution }}" \
+            -c:v libx264 -preset medium -crf 18 \
+            -c:a aac -b:a 192k \
+            -movflags +faststart \
+            "video-${{ matrix.resolution }}p.mp4"
+
+      - name: Verify output resolution
         run: |
           set -eu
-          for res in 2160 1080 720 480; do
-            ffmpeg -y -i source.input -vf "scale=-2:${res}" \
-              -c:v libx264 -preset medium -crf 18 \
-              -c:a aac -b:a 192k \
-              -movflags +faststart \
-              "video-${res}p.mp4"
-          done
+          height=$(ffprobe -v error -select_streams v:0 \
+            -show_entries stream=height -of csv=p=0 "video-${{ matrix.resolution }}p.mp4")
+          echo "video-${{ matrix.resolution }}p.mp4 -> height=${height}"
+          [ "$height" = "${{ matrix.resolution }}" ] || { echo "::error::expected height ${{ matrix.resolution }}, got $height"; exit 1; }
 
-      - name: Verify output resolutions
-        run: |
-          set -eu
-          for res in 2160 1080 720 480; do
-            height=$(ffprobe -v error -select_streams v:0 \
-              -show_entries stream=height -of csv=p=0 "video-${res}p.mp4")
-            echo "video-${res}p.mp4 -> height=${height}"
-            [ "$height" = "$res" ] || { echo "::error::expected height $res, got $height"; exit 1; }
-          done
-
-      - name: Upload transcoded assets
+      - name: Upload transcoded asset
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release upload "${{ inputs.release_tag }}" \
-            video-2160p.mp4 video-1080p.mp4 video-720p.mp4 video-480p.mp4 \
+            "video-${{ matrix.resolution }}p.mp4" \
             --repo "${{ github.repository }}" --clobber
