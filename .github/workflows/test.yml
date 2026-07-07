@@ -7,12 +7,14 @@ on:
       - scripts/**
       - .github/workflows/test.yml
       - .github/scripts/test-autoplay.js
+      - .github/scripts/test-mobile-fit.js
   pull_request:
     paths:
       - Dockerfile
       - scripts/**
       - .github/workflows/test.yml
       - .github/scripts/test-autoplay.js
+      - .github/scripts/test-mobile-fit.js
   workflow_dispatch:
 
 jobs:
@@ -198,3 +200,22 @@ jobs:
       - name: Stop OVERLAY=loading container
         if: always()
         run: docker rm -f rickroll-loading || true
+
+      - name: Start container for mobile video-fit test
+        run: docker run -d --name rickroll-mobile -p 8080:8080 rickroll:test
+
+      - name: Wait for mobile-fit container to be healthy
+        run: |
+          for i in $(seq 1 30); do
+            docker exec rickroll-mobile curl -fsS http://localhost:9090/healthz && exit 0
+            sleep 1
+          done
+          docker logs rickroll-mobile
+          exit 1
+
+      - name: Verify video uses contain on narrow viewports, cover on wide ones
+        run: node .github/scripts/test-mobile-fit.js
+
+      - name: Stop mobile-fit container
+        if: always()
+        run: docker rm -f rickroll-mobile || true

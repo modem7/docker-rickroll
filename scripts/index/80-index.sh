@@ -49,6 +49,21 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
             z-index: 0;
         }
 
+        /* object-fit: cover looks great on a wide/landscape screen, but
+           this video is 16:9 - on a narrow/portrait viewport (basically
+           any phone held normally), cover has to scale the video up so
+           much to fill the height that it ends up extremely cropped and
+           zoomed in, losing most of the picture. Switch to contain
+           (letterboxed, but the whole frame is visible) for anything
+           narrower than it is tall, regardless of the OBJECT_FIT setting
+           above - cover never looks right in that situation. */
+        @media (max-aspect-ratio: 1/1) {
+            video {
+                object-fit: contain;
+                background: #000;
+            }
+        }
+
         #headline {
             position: fixed;
             top: 1rem;
