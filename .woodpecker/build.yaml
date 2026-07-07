@@ -69,7 +69,7 @@ steps:
         BUILDKIT_INLINE_CACHE: "1"
         VIDEO_URL: https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-${RESOLUTION}.mp4
       cache_from:
-        - type=registry,ref=${CI_REPO}:${CACHE_TAG}
+        - type=registry\,ref=${CI_REPO}:${CACHE_TAG}
       platforms: linux/amd64,linux/arm64/v8
       username:
         from_secret: docker_username
