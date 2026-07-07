@@ -35,14 +35,18 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
     throw new Error(`expected initial title "Loading...", got "${initial.title}"`);
   }
 
-  await page.mouse.move(100, 100);
+  // mousemove/wheel don't count as "user interaction" for Chrome's
+  // autoplay policy - unmuting off one of those gets treated as an
+  // unmute without interaction and the browser pauses the video instead,
+  // so this test deliberately uses a real click, not a mouse move.
+  await page.mouse.click(100, 100);
 
   const unmuted = await waitFor(page, () => {
     const v = document.querySelector('video');
     return !!v && !v.muted;
   });
   if (!unmuted) {
-    throw new Error('expected video to unmute after mouse movement within 5s, but it is still muted');
+    throw new Error('expected video to unmute after a click within 5s, but it is still muted');
   }
 
   const after = await page.evaluate(() => {

@@ -18,7 +18,7 @@ Image is based on nginxinc/nginx-unprivileged, runs as a non-root user, and ever
 
 # How it works
 
-- The page autoplays the video muted (every browser allows this), then unmutes itself on the first interaction - a click, a keypress, even just moving the mouse. In practice, sound kicks in within a fraction of a second, with no visible prompt.
+- The page autoplays the video muted (every browser allows this), then unmutes itself on the first genuine interaction - a click, a tap, a keypress. Sound kicks in almost immediately, with no visible prompt. (Mouse movement/scrolling deliberately isn't used to trigger this - browsers don't count those as real interaction, and unmuting off one just gets the video paused by the browser's autoplay enforcement instead.)
 - The video is served through nginx's mp4 module, so seeking/scrubbing and byte-range requests work properly and responses are cached.
 - The video isn't stored in git. It's fetched from a GitHub Release asset at build time and baked into the image, so the shipped container is still fully self-contained and works offline - git just doesn't carry the binary around.
 - Built for both linux/amd64 and linux/arm64/v8.

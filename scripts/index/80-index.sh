@@ -77,7 +77,12 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
         (function () {
             var video = document.getElementById('video');
             var title = "$TITLE";
-            var events = ['click', 'keydown', 'touchstart', 'pointerdown', 'mousemove', 'wheel'];
+            // Only events Chrome/Vivaldi/etc actually count as "user
+            // interaction" for autoplay purposes. mousemove/wheel don't
+            // qualify - unmuting off one of those gets treated as an
+            // unmute without interaction, and the browser pauses the
+            // video as enforcement rather than actually unmuting it.
+            var events = ['click', 'keydown', 'touchstart', 'pointerdown'];
 
             function reveal() {
                 video.muted = false;
