@@ -16,149 +16,36 @@ steps:
     - hadolint --version
     - hadolint Dockerfile*
 
-- name: build-test-image
-  image: docker:dind
+# Each tag is a separate resolution built from the same Dockerfile, just
+# pointed at a different pre-transcoded video asset (see
+# .github/workflows/video-assets.yml). Actual functional testing (env
+# vars, autoplay/unmute behavior, container security posture) happens in
+# .github/workflows/test.yml, not here - the build itself is the only
+# gate before pushing. They all depend only on Lint Dockerfile, so Drone
+# runs them as a parallel matrix rather than one-after-another.
+- name: Build and Push 480p
+  image: thegeeklab/drone-docker-buildx
   privileged: true
-  volumes:
-    - name: docker
-      path: /var/run/docker.sock
+  settings:
+    repo: ${DRONE_REPO}
+    purge: true
+    compress: true
+    use_cache: true
+    build_args:
+      - BUILDKIT_INLINE_CACHE=1
+      - VIDEO_URL=https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-480p.mp4
+    cache_from: "${DRONE_REPO}:480p"
+    platforms:
+      - linux/amd64
+      - linux/arm64/v8
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags:
+      - 480p
   depends_on:
     - Lint Dockerfile
-  commands:
-    # Video is fetched pre-transcoded from a GitHub Release asset at build
-    # time (see Dockerfile VIDEO_URL build arg) - nothing local to check,
-    # and no transcoding happens as part of this build.
-    - docker build --no-cache -t rickroll:test .
-
-- name: test-container
-  image: docker:dind
-  privileged: true
-  volumes:
-    - name: docker
-      path: /var/run/docker.sock
-  commands:
-    # Cleanup any existing test containers first
-    - docker stop rickroll-test-${DRONE_BUILD_NUMBER} 2>/dev/null || true
-    - docker rm rickroll-test-${DRONE_BUILD_NUMBER} 2>/dev/null || true
-    
-    # Test container starts successfully (no host port mapping needed for internal tests)
-    - docker run -d --name rickroll-test-${DRONE_BUILD_NUMBER} rickroll:test
-    
-    # Wait for container to be ready (dynamic wait with health check)
-    - |
-      for i in $(seq 1 30); do
-        if docker exec rickroll-test-${DRONE_BUILD_NUMBER} curl -fsS http://localhost:9090/healthz >/dev/null 2>&1; then
-          echo "Container is ready after $i attempts"
-          break
-        fi
-        if [ $i -eq 30 ]; then
-          echo "Container failed to become ready after 30 attempts"
-          docker logs rickroll-test-${DRONE_BUILD_NUMBER}
-          exit 1
-        fi
-        echo "Waiting for container... attempt $i/30"
-        sleep 2
-      done
-    
-    # Test healthcheck endpoint works
-    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} curl -f http://localhost:9090/healthz || exit 1
-    
-    # Test MP4 file exists and is accessible
-    - echo "Checking for MP4 files in container:"
-    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} ls -la /usr/share/nginx/html/
-    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} find /usr/share/nginx/html/ -name "*.mp4" -type f || echo "No MP4 files found in container"
-    
-    # Test MP4 file is accessible via HTTP
-    - echo "Testing MP4 file access..."
-    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} curl -I http://localhost:8080/video.mp4 | grep "200 OK"
-    
-    # Test PORT variable functionality (default 8080)
-    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} curl -I http://localhost:8080/ | grep "200 OK"
-    
-    # Test nginx security - non-root user
-    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} whoami | grep -v root
-    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} id | grep "uid=101"
-    
-    # Test nginx security - no sudo access
-    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} which sudo && exit 1 || true
-    
-    # Test file permissions (no world-writable files)
-    - docker exec rickroll-test-${DRONE_BUILD_NUMBER} find /usr/share/nginx/html -type f -perm /o+w | wc -l | grep "^0$"
-    
-    # Cleanup test container
-    - docker stop rickroll-test-${DRONE_BUILD_NUMBER}
-    - docker rm rickroll-test-${DRONE_BUILD_NUMBER}
-  depends_on:
-    - build-test-image
-
-- name: cleanup-test-image
-  image: docker:dind
-  privileged: true
-  volumes:
-    - name: docker
-      path: /var/run/docker.sock
-  commands:
-    # Cleanup any remaining test containers
-    - docker stop rickroll-test-${DRONE_BUILD_NUMBER} 2>/dev/null || true
-    - docker rm rickroll-test-${DRONE_BUILD_NUMBER} 2>/dev/null || true
-    # Remove test image
-    - docker rmi rickroll:test 2>/dev/null || true
-  depends_on:
-    - test-container
-  when:
-    status: [ success, failure ]
-
-# Each tag is a separate resolution built from the same already-tested
-# Dockerfile, just pointed at a different pre-transcoded video asset (see
-# .github/workflows/video-assets.yml). They all depend only on
-# test-container, so Drone runs them as a parallel matrix rather than
-# one-after-another.
-- name: Build and Push latest (1080p)
-  image: thegeeklab/drone-docker-buildx
-  privileged: true
-  settings:
-    repo: ${DRONE_REPO}
-    purge: true
-    compress: true
-    use_cache: true
-    build_args:
-      - BUILDKIT_INLINE_CACHE=1
-    cache_from: "${DRONE_REPO}:latest"
-    platforms:
-      - linux/amd64
-      - linux/arm64/v8
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-    tags:
-      - latest
-  depends_on:
-    - test-container
-
-- name: Build and Push 2160p
-  image: thegeeklab/drone-docker-buildx
-  privileged: true
-  settings:
-    repo: ${DRONE_REPO}
-    purge: true
-    compress: true
-    use_cache: true
-    build_args:
-      - BUILDKIT_INLINE_CACHE=1
-      - VIDEO_URL=https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-2160p.mp4
-    cache_from: "${DRONE_REPO}:2160p"
-    platforms:
-      - linux/amd64
-      - linux/arm64/v8
-    username:
-      from_secret: docker_username
-    password:
-      from_secret: docker_password
-    tags:
-      - 2160p
-  depends_on:
-    - test-container
 
 - name: Build and Push 720p
   image: thegeeklab/drone-docker-buildx
@@ -182,9 +69,9 @@ steps:
     tags:
       - 720p
   depends_on:
-    - test-container
+    - Lint Dockerfile
 
-- name: Build and Push 480p
+- name: Build and Push 1080p (latest)
   image: thegeeklab/drone-docker-buildx
   privileged: true
   settings:
@@ -194,8 +81,7 @@ steps:
     use_cache: true
     build_args:
       - BUILDKIT_INLINE_CACHE=1
-      - VIDEO_URL=https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-480p.mp4
-    cache_from: "${DRONE_REPO}:480p"
+    cache_from: "${DRONE_REPO}:latest"
     platforms:
       - linux/amd64
       - linux/arm64/v8
@@ -204,9 +90,34 @@ steps:
     password:
       from_secret: docker_password
     tags:
-      - 480p
+      - latest
+      - 1080p
   depends_on:
-    - test-container
+    - Lint Dockerfile
+
+- name: Build and Push 2160p
+  image: thegeeklab/drone-docker-buildx
+  privileged: true
+  settings:
+    repo: ${DRONE_REPO}
+    purge: true
+    compress: true
+    use_cache: true
+    build_args:
+      - BUILDKIT_INLINE_CACHE=1
+      - VIDEO_URL=https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-2160p.mp4
+    cache_from: "${DRONE_REPO}:2160p"
+    platforms:
+      - linux/amd64
+      - linux/arm64/v8
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    tags:
+      - 2160p
+  depends_on:
+    - Lint Dockerfile
 
 - name: pushrm-dockerhub
   image: chko/docker-pushrm
@@ -222,10 +133,10 @@ steps:
     status:
       - success
   depends_on:
-    - Build and Push latest (1080p)
-    - Build and Push 2160p
-    - Build and Push 720p
     - Build and Push 480p
+    - Build and Push 720p
+    - Build and Push 1080p (latest)
+    - Build and Push 2160p
 
 - name: slack
   image: themaz/drone-slack

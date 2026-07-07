@@ -57,8 +57,46 @@ jobs:
             exit 1
           fi
 
+      - name: Check video file is actually served
+        run: |
+          status=$(curl -fsS -o /dev/null -w '%{http_code}' http://localhost:8080/video.mp4)
+          [ "$status" = "200" ]
+
+      - name: Check container runs as non-root
+        run: |
+          docker exec rickroll-default whoami | grep -qv root
+          docker exec rickroll-default id | grep -q 'uid=101'
+
+      - name: Check no sudo access
+        run: docker exec rickroll-default which sudo && exit 1 || true
+
+      - name: Check no world-writable files
+        run: |
+          count=$(docker exec rickroll-default find /usr/share/nginx/html -type f -perm /o+w | wc -l)
+          [ "$count" -eq 0 ]
+
       - name: Stop default container
         run: docker rm -f rickroll-default
+
+      - name: Start container with custom PORT
+        run: docker run -d --name rickroll-port -p 9000:9000 -e PORT=9000 rickroll:test
+
+      - name: Wait for custom PORT container to be healthy
+        run: |
+          for i in $(seq 1 30); do
+            docker exec rickroll-port curl -fsS http://localhost:9090/healthz && exit 0
+            sleep 1
+          done
+          docker logs rickroll-port
+          exit 1
+
+      - name: Check custom PORT is honored
+        run: |
+          status=$(curl -fsS -o /dev/null -w '%{http_code}' http://localhost:9000/)
+          [ "$status" = "200" ]
+
+      - name: Stop custom PORT container
+        run: docker rm -f rickroll-port
 
       - name: Start container with custom env vars
         run: |
