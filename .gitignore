@@ -1,0 +1,5 @@
+# Video source files are fetched at build time from a GitHub Release asset
+# (see Dockerfile VIDEO_URL build arg) rather than being committed to git.
+MP4/
+*.mp4
+*.mkv

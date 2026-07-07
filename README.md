@@ -24,6 +24,33 @@ Image is based on nginxinc/nginx-unprivileged, and all the content is local to t
 | Variable | Description | Default |
 | :----: | --- | --- |
 | PORT | Changes the port nginx is listening on. | 8080 |
+| TITLE | Browser tab title shown once the video is revealed (after the first click/keypress/etc). | Rickroll |
+| PRE_TITLE | Browser tab title shown before the video is revealed. | Loading... |
+| HEADLINE | Optional heading rendered over the video (e.g. a caption). Leave unset to omit it. | (none) |
+| HEIGHT | CSS height of the video element. | 100vh |
+| WIDTH | CSS width of the video element. | 100% |
+| OBJECT_FIT | CSS `object-fit` value for the video (`cover`, `contain`, etc). | cover |
+| LOOP | Whether the video loops (`true`/`false`). | true |
+| VIDEO_FILE | Filename of the video to serve, relative to the web root. | video.mp4 |
+
+# Build Arguments
+The video is fetched and re-encoded into the image at *build* time (not runtime), from a 4K master video asset attached to a [GitHub Release](https://github.com/modem7/docker-rickroll/releases/tag/video-assets-v1) rather than being stored in git. Every resolution is derived from that one master via ffmpeg during the build. These only matter if you're building the image yourself.
+
+| Build Arg | Description | Default |
+| :----: | --- | --- |
+| VIDEO_URL | URL the build downloads the source video from. | [video-assets-v1/video4k.mkv](https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video4k.mkv) |
+| RESOLUTION | `source` to use the master's native resolution as-is, or a target height like `2160p`/`1080p`/`720p`/`480p` to downscale via ffmpeg during the build. | 1080p |
+
+```bash
+# build the default (1080p, matches the published `latest` tag)
+docker build -t rickroll:1080p .
+
+# build the full 4K master
+docker build --build-arg RESOLUTION=source -t rickroll:4k .
+
+# build a smaller variant
+docker build --build-arg RESOLUTION=720p -t rickroll:720p .
+```
 
 # Configuration example
 

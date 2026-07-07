@@ -25,12 +25,8 @@ steps:
   depends_on:
     - Lint Dockerfile
   commands:
-    # Debug: Check build context for MP4 files
-    - echo "Checking build context for MP4 files:"
-    - ls -la MP4/1080/ || echo "MP4/1080/ directory not found"
-    - find . -name "*.mp4" -type f || echo "No MP4 files found in build context"
-    
-    # Build with cache invalidation
+    # Video is fetched from a GitHub Release asset at build time (see
+    # Dockerfile VIDEO_URL/RESOLUTION build args) - nothing local to check.
     - docker build --no-cache -t rickroll:test .
 
 - name: test-container
