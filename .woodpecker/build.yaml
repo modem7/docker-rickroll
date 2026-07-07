@@ -1,0 +1,74 @@
+# Bumped by video-assets.yml after a successful re-transcode, purely to
+# produce a real commit on this path - the video content itself can
+# change (re-uploaded to the same asset URLs) without any other diff
+# here for the path filter below to detect otherwise.
+# Last video refresh: never
+
+# One workflow, one matrix - each resolution is built from the same
+# Dockerfile but pointed at a different pre-transcoded video asset (see
+# .github/workflows/video-assets.yml). Actual functional testing (env
+# vars, autoplay/unmute behavior, container security posture) happens in
+# .github/workflows/test.yml, not here - lint + build is the only gate
+# before pushing.
+matrix:
+  include:
+    - RESOLUTION: 480p
+      CACHE_TAG: 480p
+      TAGS: 480p
+    - RESOLUTION: 720p
+      CACHE_TAG: 720p
+      TAGS: 720p
+    - RESOLUTION: 1080p
+      CACHE_TAG: latest
+      TAGS: 1080p,latest
+    - RESOLUTION: 2160p
+      CACHE_TAG: 2160p
+      TAGS: 2160p
+
+# Woodpecker's webhook is wired up the same way Drone's was (Settings >
+# Webhooks on the GitHub repo) - "push" here just means whatever push
+# events that webhook forwards. Auto-builds on every push to master that
+# actually touches the shipped image (Dockerfile/scripts) or a
+# resolution's VIDEO_URL (.woodpecker/*.yaml itself) - a README-only or
+# CI-config-only commit elsewhere won't trigger a rebuild. When the video
+# changes without any of those (a re-transcode uploaded to the same asset
+# URL), .github/workflows/video-assets.yml bumps the "Last video refresh"
+# marker at the top of this file and pushes that commit, which is a real
+# touch of this path and flows through the same webhook. "manual" is kept
+# so a rebuild can still be forced from the Woodpecker UI/API any time,
+# independent of either push path.
+when:
+  - event: [push, manual]
+    branch: master
+    path:
+      include:
+        - Dockerfile
+        - scripts/**
+        - .woodpecker/**
+
+steps:
+  - name: lint-dockerfile
+    image: hadolint/hadolint:latest-alpine
+    commands:
+      - hadolint --version
+      - hadolint Dockerfile*
+
+  - name: build-and-push-${RESOLUTION}
+    image: woodpeckerci/plugin-docker-buildx
+    privileged: true
+    settings:
+      repo: ${CI_REPO}
+      dockerfile: Dockerfile
+      purge: true
+      compress: true
+      build_args:
+        BUILDKIT_INLINE_CACHE: "1"
+        VIDEO_URL: https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-${RESOLUTION}.mp4
+      cache_from:
+        - type=registry,ref=${CI_REPO}:${CACHE_TAG}
+      platforms: linux/amd64,linux/arm64/v8
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      tags: ${TAGS}
