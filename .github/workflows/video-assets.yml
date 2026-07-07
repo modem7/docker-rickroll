@@ -58,3 +58,18 @@ jobs:
           gh release upload "${{ inputs.release_tag }}" \
             "video-${{ matrix.resolution }}p.mp4" \
             --repo "${{ github.repository }}" --clobber
+
+  # Video content can change (a re-transcode uploaded to the same asset
+  # URLs) without any git diff at all, so there's nothing for Drone's own
+  # push-based trigger to detect. Kick it off directly once every
+  # resolution has actually finished uploading. Needs a DRONE_TOKEN repo
+  # secret (a personal token from your Drone account settings).
+  trigger-drone:
+    needs: transcode
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Drone build
+        run: |
+          curl -fsS -X POST \
+            -H "Authorization: Bearer ${{ secrets.DRONE_TOKEN }}" \
+            "https://drone.modem7.com/api/repos/modem7/docker-rickroll/builds?branch=master"

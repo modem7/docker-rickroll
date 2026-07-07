@@ -50,10 +50,13 @@ steps:
     - Lint Dockerfile
 
 # Auto-builds on every push to master that actually touches the shipped
-# image (Dockerfile/scripts) - a README-only or CI-config-only commit
-# won't trigger a rebuild. "custom" is kept so a rebuild can still be
-# forced manually (e.g. to pick up a new video asset) without a code
-# change to hang it on.
+# image (Dockerfile/scripts) or a resolution's VIDEO_URL (.drone.yml
+# itself) - a README-only or CI-config-only commit won't trigger a
+# rebuild. When the video changes without any of those (a re-transcode
+# uploaded to the same asset URL), .github/workflows/video-assets.yml
+# triggers a "custom" build directly via the Drone API once it finishes,
+# since there's no git diff for a path filter to catch there. "custom" is
+# also still available for forcing a rebuild manually at any time.
 trigger:
   branch:
     - master
@@ -64,6 +67,7 @@ trigger:
     include:
       - Dockerfile
       - scripts/**
+      - .drone.yml
 
 ---
 
@@ -117,6 +121,7 @@ trigger:
     include:
       - Dockerfile
       - scripts/**
+      - .drone.yml
 
 ---
 
@@ -170,6 +175,7 @@ trigger:
     include:
       - Dockerfile
       - scripts/**
+      - .drone.yml
 
 ---
 
@@ -223,6 +229,7 @@ trigger:
     include:
       - Dockerfile
       - scripts/**
+      - .drone.yml
 
 ---
 
