@@ -67,79 +67,17 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
             display: none !important;
         }
 
-        /* Sits over the video so nothing plays visibly until the reveal -
-           the video itself keeps loading/playing muted underneath the
-           whole time, so it's instantly ready once this is hidden. */
-        .backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 5;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-
-        #site-backdrop {
-            background: #18181b;
-        }
-
-        .fake-header {
-            height: 56px;
-            background: #212124;
-            border-bottom: 1px solid #3f3f46;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            gap: 16px;
-        }
-
-        .fake-logo {
-            width: 110px;
-            height: 20px;
-            background: #3f3f46;
-            border-radius: 4px;
-        }
-
-        .fake-nav {
-            display: flex;
-            gap: 12px;
-            margin-left: auto;
-        }
-
-        .fake-nav span {
-            width: 56px;
-            height: 12px;
-            background: #3f3f46;
-            border-radius: 6px;
-        }
-
-        .fake-content {
-            padding: 40px;
-            max-width: 720px;
-        }
-
-        .skeleton-block {
-            height: 18px;
-            background: #3f3f46;
-            border-radius: 4px;
-            margin-bottom: 14px;
-            width: 100%;
-        }
-
-        .skeleton-block.short {
-            width: 55%;
-        }
-
         .prompt {
             position: fixed;
             left: 0;
             right: 0;
             z-index: 10;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
         #cookie-banner {
             bottom: 0;
+            z-index: 15;
             background: #27272a;
             color: #f4f4f5;
             padding: 16px 20px;
@@ -171,50 +109,75 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
             cursor: pointer;
         }
 
+        /* A genuine 500/502 error is usually rendered by a completely
+           different layer of the stack than the site itself (the load
+           balancer, the CDN, a generic web server default page) - it
+           doesn't inherit the site's own styling. A plain white
+           full-page takeover that looks nothing like the dark theme
+           everywhere else sells that far better than a dark modal
+           floating over visible page content would. */
         #site-error {
             top: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
+            background: #ffffff;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-        }
-
-        #site-error .card {
-            background: #27272a;
-            color: #f4f4f5;
-            padding: 28px 32px;
-            border-radius: 8px;
             text-align: center;
-            max-width: 280px;
-            border: 1px solid #3f3f46;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+            padding: 24px;
         }
 
-        #site-error .card p.title {
-            font-size: 16px;
+        #site-error .icon {
+            width: 56px;
+            height: 56px;
+            margin-bottom: 20px;
+        }
+
+        #site-error .code {
+            font-size: 64px;
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1;
+            margin: 0 0 8px;
+        }
+
+        #site-error .title {
+            font-size: 18px;
             font-weight: 600;
-            margin: 0 0 6px;
+            color: #1a1a1a;
+            margin: 0 0 12px;
         }
 
-        #site-error .card p.code {
-            font-size: 13px;
-            color: #a1a1aa;
-            margin: 0 0 16px;
+        #site-error .message {
+            font-size: 14px;
+            color: #6b6b6b;
+            max-width: 360px;
+            line-height: 1.6;
+            margin: 0 0 28px;
         }
 
         #site-error button {
-            background: #f4f4f5;
-            color: #18181b;
+            background: #1a1a1a;
+            color: #fff;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 28px;
             border-radius: 4px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
         }
 
+        #site-error .reference {
+            margin-top: 28px;
+            font-size: 12px;
+            color: #9a9a9a;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+
         #loading-screen {
+            top: 0;
+            bottom: 0;
             background: #18181b;
             display: flex;
             align-items: center;
@@ -269,19 +232,7 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
         Sorry, your browser doesn't support embedded videos.
     </video>
 
-    <div id="site-backdrop" class="backdrop hidden">
-        <div class="fake-header">
-            <div class="fake-logo"></div>
-            <div class="fake-nav"><span></span><span></span><span></span></div>
-        </div>
-        <div class="fake-content">
-            <div class="skeleton-block"></div>
-            <div class="skeleton-block"></div>
-            <div class="skeleton-block short"></div>
-        </div>
-    </div>
-
-    <div id="loading-screen" class="backdrop hidden">
+    <div id="loading-screen" class="prompt hidden">
         <div class="wrap">
             <div class="spinner"></div>
             <p class="status">Loading...</p>
@@ -289,17 +240,22 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
         </div>
     </div>
 
+    <div id="site-error" class="prompt hidden">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <p class="code">500</p>
+        <p class="title">Internal Server Error</p>
+        <p class="message">The server encountered an internal error and was unable to complete your request.</p>
+        <button type="button">Reload page</button>
+        <p class="reference" id="error-reference"></p>
+    </div>
+
     <div id="cookie-banner" class="prompt hidden">
         <p>This site uses cookies to improve your experience.</p>
         <button type="button">Accept</button>
-    </div>
-
-    <div id="site-error" class="prompt hidden">
-        <div class="card">
-            <p class="title">Something went wrong</p>
-            <p class="code">Error 500</p>
-            <button type="button">Reload</button>
-        </div>
     </div>
 
     <noscript>
@@ -314,6 +270,14 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
             var headline = document.getElementById('headline');
             var title = "$TITLE";
 
+            function randomHex(len) {
+                var s = '';
+                for (var i = 0; i < len; i++) {
+                    s += Math.floor(Math.random() * 16).toString(16);
+                }
+                return s.toUpperCase();
+            }
+
             // "loading" and "error" are mutually exclusive page states - a
             // page can't be both at once - so one of those two is picked
             // at random. The cookie banner isn't a page state, it's site
@@ -327,7 +291,6 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
             var enabled = configured.length > 0 ? configured : validTypes;
             var choice = enabled[Math.floor(Math.random() * enabled.length)];
 
-            var siteBackdrop = document.getElementById('site-backdrop');
             var loadingScreen = document.getElementById('loading-screen');
             var cookieBanner = document.getElementById('cookie-banner');
             var siteError = document.getElementById('site-error');
@@ -343,8 +306,11 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
                     }
                 }, 3000);
             } else {
-                siteBackdrop.classList.remove('hidden');
                 siteError.classList.remove('hidden');
+                var ref = document.getElementById('error-reference');
+                if (ref) {
+                    ref.textContent = 'Reference #' + randomHex(8);
+                }
             }
 
             var events = ['click', 'keydown', 'touchstart', 'pointerdown'];
@@ -356,7 +322,6 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
                 if (headline) {
                     headline.classList.remove('hidden');
                 }
-                siteBackdrop.classList.add('hidden');
                 loadingScreen.classList.add('hidden');
                 cookieBanner.classList.add('hidden');
                 siteError.classList.add('hidden');
