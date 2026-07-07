@@ -10,20 +10,24 @@
 # vars, autoplay/unmute behavior, container security posture) happens in
 # .github/workflows/test.yml, not here - lint + build is the only gate
 # before pushing.
+# TEMPORARY test tags (TAGS/CACHE_TAG suffixed -test) while validating
+# on test/woodpecker-migration - revert to the real 480p/720p/1080p+latest/
+# 2160p tags before this merges to master, or the finalize workflow will
+# push -test README/Slack noise for a real release.
 matrix:
   include:
     - RESOLUTION: 480p
-      CACHE_TAG: 480p
-      TAGS: 480p
+      CACHE_TAG: 480p-test
+      TAGS: 480p-test
     - RESOLUTION: 720p
-      CACHE_TAG: 720p
-      TAGS: 720p
+      CACHE_TAG: 720p-test
+      TAGS: 720p-test
     - RESOLUTION: 1080p
-      CACHE_TAG: latest
-      TAGS: 1080p,latest
+      CACHE_TAG: 1080p-test
+      TAGS: 1080p-test
     - RESOLUTION: 2160p
-      CACHE_TAG: 2160p
-      TAGS: 2160p
+      CACHE_TAG: 2160p-test
+      TAGS: 2160p-test
 
 # Woodpecker's webhook is wired up the same way Drone's was (Settings >
 # Webhooks on the GitHub repo) - "push" here just means whatever push
@@ -39,7 +43,7 @@ matrix:
 # independent of either push path.
 when:
   - event: [push, manual]
-    branch: master
+    branch: [master, test/woodpecker-migration]
     path:
       include:
         - Dockerfile

@@ -11,7 +11,7 @@ depends_on:
 # this particular push.
 when:
   - event: [push, manual]
-    branch: master
+    branch: [master, test/woodpecker-migration]
     status: [success, failure]
 
 steps:
