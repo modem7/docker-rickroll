@@ -49,18 +49,15 @@ jobs:
         run: |
           set -eu
           headers=$(curl -sS -o /dev/null -D - http://localhost:8080/)
-          echo "--- headers received ---"
-          echo "$headers"
-          echo "------------------------"
           echo "$headers" | grep -qE '^HTTP/[0-9.]+ 302'
-          echo "$headers" | grep -qi '^location: */video\.mp4'
+          echo "$headers" | grep -qiE '^location:.*/video\.mp4'
 
       - name: Check an arbitrary path also redirects to the video
         run: |
           set -eu
           headers=$(curl -sS -o /dev/null -D - http://localhost:8080/some/random/path)
           echo "$headers" | grep -qE '^HTTP/[0-9.]+ 302'
-          echo "$headers" | grep -qi '^location: */video\.mp4'
+          echo "$headers" | grep -qiE '^location:.*/video\.mp4'
 
       - name: Check video file is actually served
         run: |
