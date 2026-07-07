@@ -34,23 +34,21 @@ Image is based on nginxinc/nginx-unprivileged, and all the content is local to t
 | VIDEO_FILE | Filename of the video to serve, relative to the web root. | video.mp4 |
 
 # Build Arguments
-The video is fetched and re-encoded into the image at *build* time (not runtime), from a 4K master video asset attached to a [GitHub Release](https://github.com/modem7/docker-rickroll/releases/tag/video-assets-v1) rather than being stored in git. Every resolution is derived from that one master via ffmpeg during the build. These only matter if you're building the image yourself.
+The video is fetched pre-transcoded from a video asset attached to a [GitHub Release](https://github.com/modem7/docker-rickroll/releases/tag/video-assets-v1) at *build* time, rather than being stored in git. This only matters if you're building the image yourself.
 
 | Build Arg | Description | Default |
 | :----: | --- | --- |
-| VIDEO_URL | URL the build downloads the source video from. | [video-assets-v1/video4k.mkv](https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video4k.mkv) |
-| RESOLUTION | `source` to use the master's native resolution as-is, or a target height like `2160p`/`1080p`/`720p`/`480p` to downscale via ffmpeg during the build. | 1080p |
+| VIDEO_URL | URL the build downloads the (already-transcoded) video from. | [video-assets-v1/video.mp4](https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video.mp4) (1080p) |
 
 ```bash
 # build the default (1080p, matches the published `latest` tag)
 docker build -t rickroll:1080p .
 
-# build the full 4K master
-docker build --build-arg RESOLUTION=source -t rickroll:4k .
-
-# build a smaller variant
-docker build --build-arg RESOLUTION=720p -t rickroll:720p .
+# build a different resolution once its asset has been generated
+docker build --build-arg VIDEO_URL=https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-720p.mp4 -t rickroll:720p .
 ```
+
+Transcoding itself (4K master -> 2160p/1080p/720p/480p mp4s) is a separate, manually-triggered [GitHub Actions workflow](.github/workflows/video-assets.yml) that runs against the master video asset and uploads the results back to the Release - it only needs to run when the master video changes, not on every Docker build.
 
 # Configuration example
 

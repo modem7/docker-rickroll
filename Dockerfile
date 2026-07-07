@@ -1,35 +1,18 @@
 # syntax = docker/dockerfile:latest
 
-# ---- Fetch and (optionally) transcode the source video. Build-time only -
-# ---- the result is baked into the final image, never stored in git/LFS.
+# ---- Fetch the pre-transcoded video. Build-time only - baked into the
+# ---- final image, never stored in git/LFS. Transcoding to the various
+# ---- resolutions happens separately and infrequently, not on every image
+# ---- build (see .github/workflows/video-assets.yml).
 FROM --platform=$BUILDPLATFORM alpine:3.20 AS video
 
 # hadolint ignore=DL3018
-RUN apk add --no-cache curl ffmpeg
+RUN apk add --no-cache curl
 
-ARG VIDEO_URL=https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video4k.mkv
-ARG RESOLUTION=1080p
+ARG VIDEO_URL=https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video.mp4
 
 WORKDIR /video
-RUN curl -fsSL "$VIDEO_URL" -o source.input
-
-# Always re-encode to a faststart-ready mp4 so any source container/codec
-# (mkv, mp4, etc) works, and downscale unless RESOLUTION=source is requested.
-RUN set -eu; \
-    case "$RESOLUTION" in \
-        source) \
-            ffmpeg -y -i source.input \
-                -c:v libx264 -preset medium -crf 18 \
-                -c:a aac -b:a 192k \
-                -movflags +faststart \
-                video.mp4 ;; \
-        *) \
-            ffmpeg -y -i source.input -vf "scale=-2:${RESOLUTION%p}" \
-                -c:v libx264 -preset medium -crf 18 \
-                -c:a aac -b:a 192k \
-                -movflags +faststart \
-                video.mp4 ;; \
-    esac
+RUN curl -fsSL "$VIDEO_URL" -o video.mp4
 
 # ---- Final image ----
 FROM nginxinc/nginx-unprivileged:1.31.2-alpine
