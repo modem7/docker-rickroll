@@ -9,7 +9,7 @@ FROM --platform=$BUILDPLATFORM alpine:3.20 AS video
 # hadolint ignore=DL3018
 RUN apk add --no-cache curl
 
-ARG VIDEO_URL=https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video.mp4
+ARG VIDEO_URL=https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-1080p.mp4
 
 WORKDIR /video
 RUN curl -fsSL "$VIDEO_URL" -o video.mp4
