@@ -1,0 +1,132 @@
+name: Test image
+
+on:
+  push:
+    paths:
+      - Dockerfile
+      - scripts/**
+      - .github/workflows/test.yml
+      - .github/scripts/test-autoplay.js
+  pull_request:
+    paths:
+      - Dockerfile
+      - scripts/**
+      - .github/workflows/test.yml
+      - .github/scripts/test-autoplay.js
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile
+          load: true
+          tags: rickroll:test
+
+      - name: Start container with default env vars
+        run: docker run -d --name rickroll-default -p 8080:8080 rickroll:test
+
+      - name: Wait for default container to be healthy
+        run: |
+          for i in $(seq 1 30); do
+            docker exec rickroll-default curl -fsS http://localhost:9090/healthz && exit 0
+            sleep 1
+          done
+          docker logs rickroll-default
+          exit 1
+
+      - name: Check default page output
+        run: |
+          set -eu
+          html=$(curl -fsS http://localhost:8080/)
+          echo "$html" | grep -q '<title>Loading...</title>'
+          echo "$html" | grep -q 'source src="video.mp4"'
+          echo "$html" | grep -qE '<video[^>]*\bloop\b'
+          if echo "$html" | grep -q 'id="headline"'; then
+            echo "unexpected headline present with HEADLINE unset"
+            exit 1
+          fi
+
+      - name: Stop default container
+        run: docker rm -f rickroll-default
+
+      - name: Start container with custom env vars
+        run: |
+          docker run -d --name rickroll-custom -p 8080:8080 \
+            -e TITLE="Custom Title" \
+            -e PRE_TITLE="Custom Loading" \
+            -e HEADLINE="Never Gonna Give You Up" \
+            -e HEIGHT=50vh \
+            -e WIDTH=50% \
+            -e OBJECT_FIT=contain \
+            -e LOOP=false \
+            -e VIDEO_FILE=custom.mp4 \
+            rickroll:test
+
+      - name: Wait for custom container to be healthy
+        run: |
+          for i in $(seq 1 30); do
+            docker exec rickroll-custom curl -fsS http://localhost:9090/healthz && exit 0
+            sleep 1
+          done
+          docker logs rickroll-custom
+          exit 1
+
+      - name: Check custom env vars took effect
+        run: |
+          set -eu
+          html=$(curl -fsS http://localhost:8080/)
+          echo "$html" | grep -q '<title>Custom Loading</title>'
+          echo "$html" | grep -q 'var title = "Custom Title";'
+          echo "$html" | grep -q 'id="headline">Never Gonna Give You Up<'
+          echo "$html" | grep -q 'height: 50vh'
+          echo "$html" | grep -q 'width: 50%'
+          echo "$html" | grep -q 'object-fit: contain'
+          echo "$html" | grep -q 'source src="custom.mp4"'
+          if echo "$html" | grep -qE '<video[^>]*\bloop\b'; then
+            echo "unexpected loop attribute present with LOOP=false"
+            exit 1
+          fi
+
+      - name: Stop custom container
+        run: docker rm -f rickroll-custom
+
+      - name: Start container for browser test
+        run: docker run -d --name rickroll-browser -p 8080:8080 rickroll:test
+
+      - name: Wait for browser-test container to be healthy
+        run: |
+          for i in $(seq 1 30); do
+            docker exec rickroll-browser curl -fsS http://localhost:9090/healthz && exit 0
+            sleep 1
+          done
+          docker logs rickroll-browser
+          exit 1
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Playwright
+        run: |
+          npm init -y >/dev/null
+          npm install --no-save playwright@1
+          npx playwright install --with-deps chromium
+
+      - name: Verify autoplay-muted then unmute-on-interaction
+        run: node .github/scripts/test-autoplay.js
+
+      - name: Stop browser-test container
+        if: always()
+        run: docker rm -f rickroll-browser || true
