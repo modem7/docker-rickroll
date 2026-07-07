@@ -9,7 +9,16 @@
 
 More info can be found [here](https://www.youtube.com/watch?v=dQw4w9WgXcQ).
 
-Image is based on nginxinc/nginx-unprivileged, and all the content is local to the container.
+Point someone at this container and they get video and audio, autoplaying, in any modern browser. No plugins, no "click to unmute" button, no redirect tricks - it just plays.
+
+Image is based on nginxinc/nginx-unprivileged, runs as a non-root user, and everything needed to serve the video is baked into the image at build time - no external dependencies at runtime.
+
+# How it works
+
+- The page autoplays the video muted (every browser allows this), then unmutes itself on the first interaction - a click, a keypress, even just moving the mouse. In practice, sound kicks in within a fraction of a second, with no visible prompt.
+- The video is served through nginx's mp4 module, so seeking/scrubbing and byte-range requests work properly and responses are cached.
+- The video isn't stored in git. It's fetched from a GitHub Release asset at build time and baked into the image, so the shipped container is still fully self-contained and works offline - git just doesn't carry the binary around.
+- Built for both linux/amd64 and linux/arm64/v8.
 
 # Container Screenshot
 
@@ -34,7 +43,7 @@ Image is based on nginxinc/nginx-unprivileged, and all the content is local to t
 | VIDEO_FILE | Filename of the video to serve, relative to the web root. | video.mp4 |
 
 # Build Arguments
-The video is fetched pre-transcoded from a video asset attached to a [GitHub Release](https://github.com/modem7/docker-rickroll/releases/tag/video-assets-v1) at *build* time, rather than being stored in git. This only matters if you're building the image yourself.
+The video is fetched pre-transcoded from a video asset attached to a [GitHub Release](https://github.com/modem7/docker-rickroll/releases/tag/video-assets-v1) at build time, rather than being stored in git. This only matters if you're building the image yourself - the published `latest` tag already has it baked in.
 
 | Build Arg | Description | Default |
 | :----: | --- | --- |
@@ -44,11 +53,11 @@ The video is fetched pre-transcoded from a video asset attached to a [GitHub Rel
 # build the default (1080p, matches the published `latest` tag)
 docker build -t rickroll:1080p .
 
-# build a different resolution once its asset has been generated
+# point it at a different resolution asset instead
 docker build --build-arg VIDEO_URL=https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-720p.mp4 -t rickroll:720p .
 ```
 
-Transcoding itself (4K master -> 2160p/1080p/720p/480p mp4s) is a separate, manually-triggered [GitHub Actions workflow](.github/workflows/video-assets.yml) that runs against the master video asset and uploads the results back to the Release - it only needs to run when the master video changes, not on every Docker build.
+Transcoding (4K master -> 2160p/1080p/720p/480p mp4s) happens separately, via a manually-triggered [GitHub Actions workflow](.github/workflows/video-assets.yml) that runs against the master video and uploads the results back to the Release. It only needs to run when the master video changes, not on every build.
 
 # Configuration example
 
