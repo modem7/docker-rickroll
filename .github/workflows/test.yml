@@ -45,22 +45,25 @@ jobs:
           docker logs rickroll-default
           exit 1
 
-      - name: Check default page output
+      - name: Check root redirects straight to the video
         run: |
           set -eu
-          html=$(curl -fsS http://localhost:8080/)
-          echo "$html" | grep -q '<title>Loading...</title>'
-          echo "$html" | grep -q 'source src="video.mp4"'
-          echo "$html" | grep -qE '<video[^>]*\bloop\b'
-          if echo "$html" | grep -q 'id="headline"'; then
-            echo "unexpected headline present with HEADLINE unset"
-            exit 1
-          fi
+          headers=$(curl -sS -o /dev/null -D - http://localhost:8080/)
+          echo "$headers" | grep -qE '^HTTP/[0-9.]+ 302'
+          echo "$headers" | grep -qi '^location: */video\.mp4'
+
+      - name: Check an arbitrary path also redirects to the video
+        run: |
+          set -eu
+          headers=$(curl -sS -o /dev/null -D - http://localhost:8080/some/random/path)
+          echo "$headers" | grep -qE '^HTTP/[0-9.]+ 302'
+          echo "$headers" | grep -qi '^location: */video\.mp4'
 
       - name: Check video file is actually served
         run: |
-          status=$(curl -fsS -o /dev/null -w '%{http_code}' http://localhost:8080/video.mp4)
-          [ "$status" = "200" ]
+          headers=$(curl -sS -o /dev/null -D - http://localhost:8080/video.mp4)
+          echo "$headers" | grep -qE '^HTTP/[0-9.]+ 200'
+          echo "$headers" | grep -qi '^content-type: *video/mp4'
 
       - name: Check container runs as non-root
         run: |
@@ -92,52 +95,11 @@ jobs:
 
       - name: Check custom PORT is honored
         run: |
-          status=$(curl -fsS -o /dev/null -w '%{http_code}' http://localhost:9000/)
+          status=$(curl -fsSL -o /dev/null -w '%{http_code}' http://localhost:9000/)
           [ "$status" = "200" ]
 
       - name: Stop custom PORT container
         run: docker rm -f rickroll-port
-
-      - name: Start container with custom env vars
-        run: |
-          docker run -d --name rickroll-custom -p 8080:8080 \
-            -e TITLE="Custom Title" \
-            -e PRE_TITLE="Custom Loading" \
-            -e HEADLINE="Never Gonna Give You Up" \
-            -e HEIGHT=50vh \
-            -e WIDTH=50% \
-            -e OBJECT_FIT=contain \
-            -e LOOP=false \
-            -e VIDEO_FILE=custom.mp4 \
-            rickroll:test
-
-      - name: Wait for custom container to be healthy
-        run: |
-          for i in $(seq 1 30); do
-            docker exec rickroll-custom curl -fsS http://localhost:9090/healthz && exit 0
-            sleep 1
-          done
-          docker logs rickroll-custom
-          exit 1
-
-      - name: Check custom env vars took effect
-        run: |
-          set -eu
-          html=$(curl -fsS http://localhost:8080/)
-          echo "$html" | grep -q '<title>Custom Loading</title>'
-          echo "$html" | grep -q 'var title = "Custom Title";'
-          echo "$html" | grep -q 'id="headline">Never Gonna Give You Up<'
-          echo "$html" | grep -q 'height: 50vh'
-          echo "$html" | grep -q 'width: 50%'
-          echo "$html" | grep -q 'object-fit: contain'
-          echo "$html" | grep -q 'source src="custom.mp4"'
-          if echo "$html" | grep -qE '<video[^>]*\bloop\b'; then
-            echo "unexpected loop attribute present with LOOP=false"
-            exit 1
-          fi
-
-      - name: Stop custom container
-        run: docker rm -f rickroll-custom
 
       - name: Start container for browser test
         run: docker run -d --name rickroll-browser -p 8080:8080 rickroll:test
@@ -162,7 +124,7 @@ jobs:
           npm install --no-save playwright@1
           npx playwright install --with-deps chromium
 
-      - name: Verify autoplay-muted then unmute-on-interaction
+      - name: Verify video autoplays with sound with zero interaction
         run: node .github/scripts/test-autoplay.js
 
       - name: Stop browser-test container
