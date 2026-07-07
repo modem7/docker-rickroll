@@ -2,12 +2,21 @@
 
 kind: pipeline
 type: docker
-name: docker-rickroll
+name: build-480p
 
 platform:
   os: linux
   arch: amd64
 
+# Each resolution is its own pipeline (Drone's matrix idiom for this
+# pipeline format), built from the same Dockerfile but pointed at a
+# different pre-transcoded video asset (see
+# .github/workflows/video-assets.yml). Actual functional testing (env
+# vars, autoplay/unmute behavior, container security posture) happens in
+# .github/workflows/test.yml, not here - lint + build is the only gate
+# before pushing. Independent pipelines get scheduled onto whichever
+# runner is free, so 2 runners run 2 of these at a time, 4 runners run
+# all of them at once.
 steps:
 - name: Lint Dockerfile
   image: hadolint/hadolint:latest-alpine
@@ -16,13 +25,6 @@ steps:
     - hadolint --version
     - hadolint Dockerfile*
 
-# Each tag is a separate resolution built from the same Dockerfile, just
-# pointed at a different pre-transcoded video asset (see
-# .github/workflows/video-assets.yml). Actual functional testing (env
-# vars, autoplay/unmute behavior, container security posture) happens in
-# .github/workflows/test.yml, not here - the build itself is the only
-# gate before pushing. They all depend only on Lint Dockerfile, so Drone
-# runs them as a parallel matrix rather than one-after-another.
 - name: Build and Push 480p
   image: thegeeklab/drone-docker-buildx
   privileged: true
@@ -46,6 +48,28 @@ steps:
       - 480p
   depends_on:
     - Lint Dockerfile
+
+trigger:
+  event:
+    - custom
+
+---
+
+kind: pipeline
+type: docker
+name: build-720p
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: Lint Dockerfile
+  image: hadolint/hadolint:latest-alpine
+  pull: if-not-exists
+  commands:
+    - hadolint --version
+    - hadolint Dockerfile*
 
 - name: Build and Push 720p
   image: thegeeklab/drone-docker-buildx
@@ -71,6 +95,28 @@ steps:
   depends_on:
     - Lint Dockerfile
 
+trigger:
+  event:
+    - custom
+
+---
+
+kind: pipeline
+type: docker
+name: build-1080p-latest
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: Lint Dockerfile
+  image: hadolint/hadolint:latest-alpine
+  pull: if-not-exists
+  commands:
+    - hadolint --version
+    - hadolint Dockerfile*
+
 - name: Build and Push 1080p (latest)
   image: thegeeklab/drone-docker-buildx
   privileged: true
@@ -94,6 +140,28 @@ steps:
       - 1080p
   depends_on:
     - Lint Dockerfile
+
+trigger:
+  event:
+    - custom
+
+---
+
+kind: pipeline
+type: docker
+name: build-2160p
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: Lint Dockerfile
+  image: hadolint/hadolint:latest-alpine
+  pull: if-not-exists
+  commands:
+    - hadolint --version
+    - hadolint Dockerfile*
 
 - name: Build and Push 2160p
   image: thegeeklab/drone-docker-buildx
@@ -119,6 +187,30 @@ steps:
   depends_on:
     - Lint Dockerfile
 
+trigger:
+  event:
+    - custom
+
+---
+
+kind: pipeline
+type: docker
+name: finalize
+
+platform:
+  os: linux
+  arch: amd64
+
+# Waits for all four resolution pipelines. Runs even if one of them
+# failed (status: failure below) so Slack still gets notified either way,
+# but pushrm only pushes the README if everything actually succeeded.
+depends_on:
+  - build-480p
+  - build-720p
+  - build-1080p-latest
+  - build-2160p
+
+steps:
 - name: pushrm-dockerhub
   image: chko/docker-pushrm
   environment:
@@ -132,11 +224,6 @@ steps:
   when:
     status:
       - success
-  depends_on:
-    - Build and Push 480p
-    - Build and Push 720p
-    - Build and Push 1080p (latest)
-    - Build and Push 2160p
 
 - name: slack
   image: themaz/drone-slack
@@ -148,11 +235,9 @@ steps:
   depends_on:
     - pushrm-dockerhub
 
-volumes:
-- name: docker
-  host:
-    path: /var/run/docker.sock
-
 trigger:
   event:
     - custom
+  status:
+    - success
+    - failure
