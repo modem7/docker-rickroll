@@ -1,12 +1,16 @@
 const { chromium } = require('playwright');
 
-const overlayType = process.argv[2];
-if (overlayType !== 'cookie' && overlayType !== 'error') {
-  throw new Error(`usage: node test-autoplay.js <cookie|error>, got "${overlayType}"`);
-}
+const CONFIG = {
+  cookie: { overlaySelector: '#cookie-banner', clickSelector: '#cookie-banner button' },
+  error: { overlaySelector: '#site-error', clickSelector: '#site-error button' },
+  loading: { overlaySelector: '#loading-screen', clickSelector: 'body' }
+};
 
-const overlaySelector = overlayType === 'cookie' ? '#cookie-banner' : '#site-error';
-const buttonSelector = `${overlaySelector} button`;
+const overlayType = process.argv[2];
+if (!CONFIG[overlayType]) {
+  throw new Error(`usage: node test-autoplay.js <${Object.keys(CONFIG).join('|')}>, got "${overlayType}"`);
+}
+const { overlaySelector, clickSelector } = CONFIG[overlayType];
 
 async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {}) {
   const start = Date.now();
@@ -52,14 +56,14 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
     throw new Error(`expected the ${overlayType} overlay to be visible, but it wasn't`);
   }
 
-  await page.click(buttonSelector);
+  await page.click(clickSelector);
 
   const unmuted = await waitFor(page, () => {
     const v = document.getElementById('video');
     return !!v && !v.muted;
   });
   if (!unmuted) {
-    throw new Error('expected video to unmute after clicking the overlay button within 5s, but it is still muted');
+    throw new Error('expected video to unmute after clicking within 5s, but it is still muted');
   }
 
   const after = await page.evaluate((sel) => {
@@ -79,10 +83,10 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
     throw new Error(`expected title "Rickroll" after interaction, got "${after.title}"`);
   }
   if (after.overlayVisible) {
-    throw new Error(`expected the ${overlayType} overlay to be hidden after clicking it, but it is still visible`);
+    throw new Error(`expected the ${overlayType} overlay to be hidden after clicking, but it is still visible`);
   }
 
-  console.log(`OK: ${overlayType} overlay shown, video autoplays muted, and clicking it unmutes + hides the overlay`);
+  console.log(`OK: ${overlayType} overlay shown, video autoplays muted, and clicking unmutes + hides the overlay`);
   await browser.close();
 })().catch((err) => {
   console.error(err);
