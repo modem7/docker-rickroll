@@ -45,8 +45,6 @@ All tags are built from the same image - only the baked-in video resolution diff
 # Configuration example
 
 ```yaml
-version: "2.4"
-
 services:
 
   rickroll:
