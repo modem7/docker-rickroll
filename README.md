@@ -1,7 +1,10 @@
 # Self Hosted, self contained Rickroll container.
 
 ![Docker Pulls](https://img.shields.io/docker/pulls/modem7/docker-rickroll) 
-![Docker Image Size (tag)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/latest?label=latest%2Fonclick) 
+![Docker Image Size (latest)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/latest?label=latest) 
+![Docker Image Size (2160p)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/2160p?label=2160p) 
+![Docker Image Size (720p)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/720p?label=720p) 
+![Docker Image Size (480p)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/480p?label=480p) 
 [![Build Status](https://drone.modem7.com/api/badges/modem7/docker-rickroll/status.svg)](https://drone.modem7.com/modem7/docker-rickroll)
 [![GitHub last commit](https://img.shields.io/github/last-commit/modem7/docker-rickroll)](https://github.com/modem7/docker-rickroll)
 
