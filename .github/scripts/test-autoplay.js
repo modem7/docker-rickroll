@@ -36,7 +36,7 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
     throw new Error('expected video to start autoplaying (muted) within 5s, but it never left the paused state');
   }
 
-  const initial = await page.evaluate((sel, cookieSel) => {
+  const initial = await page.evaluate(({ sel, cookieSel }) => {
     const v = document.getElementById('video');
     const overlay = document.querySelector(sel);
     const cookie = document.querySelector(cookieSel);
@@ -46,7 +46,7 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
       overlayVisible: overlay ? !overlay.classList.contains('hidden') : null,
       cookieVisible: cookie ? !cookie.classList.contains('hidden') : null
     };
-  }, overlaySelector, cookieSelector);
+  }, { sel: overlaySelector, cookieSel: cookieSelector });
 
   if (!initial.muted) {
     throw new Error(`expected video to start muted, got muted=${initial.muted}`);
@@ -73,7 +73,7 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
     throw new Error('expected video to unmute after clicking within 5s, but it is still muted');
   }
 
-  const after = await page.evaluate((sel, cookieSel) => {
+  const after = await page.evaluate(({ sel, cookieSel }) => {
     const v = document.getElementById('video');
     const overlay = document.querySelector(sel);
     const cookie = document.querySelector(cookieSel);
@@ -83,7 +83,7 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
       overlayVisible: overlay ? !overlay.classList.contains('hidden') : null,
       cookieVisible: cookie ? !cookie.classList.contains('hidden') : null
     };
-  }, overlaySelector, cookieSelector);
+  }, { sel: overlaySelector, cookieSel: cookieSelector });
 
   if (after.paused) {
     throw new Error('expected video to still be playing after unmuting');
