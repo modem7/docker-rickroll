@@ -1,15 +1,15 @@
 const { chromium } = require('playwright');
 
 const CONFIG = {
-  error: { overlaySelector: '#site-error', clickSelector: '#site-error button' },
-  loading: { overlaySelector: '#loading-screen', clickSelector: 'body' }
+  error: { overlaySelector: '#site-error', clickSelector: '#site-error button', initialTitle: 'Internal Server Error' },
+  loading: { overlaySelector: '#loading-screen', clickSelector: 'body', initialTitle: 'Loading...' }
 };
 
 const overlayType = process.argv[2];
 if (!CONFIG[overlayType]) {
   throw new Error(`usage: node test-autoplay.js <${Object.keys(CONFIG).join('|')}>, got "${overlayType}"`);
 }
-const { overlaySelector, clickSelector } = CONFIG[overlayType];
+const { overlaySelector, clickSelector, initialTitle } = CONFIG[overlayType];
 const cookieSelector = '#cookie-banner';
 
 async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {}) {
@@ -51,8 +51,12 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
   if (!initial.muted) {
     throw new Error(`expected video to start muted, got muted=${initial.muted}`);
   }
-  if (initial.title !== 'Loading...') {
-    throw new Error(`expected initial title "Loading...", got "${initial.title}"`);
+  // The <title> tag is static HTML and always starts as PRE_TITLE
+  // ("Loading..." by default) regardless of which state actually gets
+  // picked - the page JS has to override it to match, or the tab title
+  // says "Loading..." over a page that's showing a 500 error.
+  if (initial.title !== initialTitle) {
+    throw new Error(`expected initial title "${initialTitle}" for ${overlayType}, got "${initial.title}"`);
   }
   if (!initial.overlayVisible) {
     throw new Error(`expected the ${overlayType} overlay to be visible, but it wasn't`);
