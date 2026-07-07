@@ -4,33 +4,35 @@ const { chromium } = require('playwright');
 // viewport, but on a narrow/portrait one (basically any phone) it has
 // to scale up so far to cover the height that it ends up extremely
 // cropped/zoomed in. Confirms the aspect-ratio media query correctly
-// switches to contain on narrow viewports and leaves desktop alone.
+// switches to contain on narrow/portrait viewports and leaves
+// cover in place everywhere from small desktop windows up to 4K.
+const VIEWPORTS = [
+  { name: 'mobile portrait', width: 375, height: 812, expected: 'contain' },
+  { name: 'tablet portrait', width: 768, height: 1024, expected: 'contain' },
+  { name: 'tablet landscape', width: 1024, height: 768, expected: 'cover' },
+  { name: 'small desktop', width: 1280, height: 800, expected: 'cover' },
+  { name: '1080p desktop', width: 1920, height: 1080, expected: 'cover' },
+  { name: '4K desktop', width: 3840, height: 2160, expected: 'cover' }
+];
+
 (async () => {
   const browser = await chromium.launch();
 
-  const mobilePage = await browser.newPage({ viewport: { width: 375, height: 812 } });
-  await mobilePage.goto('http://localhost:8080/', { waitUntil: 'load' });
-  const mobileFit = await mobilePage.evaluate(() => {
-    const v = document.getElementById('video');
-    return getComputedStyle(v).objectFit;
-  });
-  if (mobileFit !== 'contain') {
-    throw new Error(`expected object-fit: contain on a narrow/portrait viewport (375x812), got "${mobileFit}"`);
-  }
-  await mobilePage.close();
+  for (const { name, width, height, expected } of VIEWPORTS) {
+    const page = await browser.newPage({ viewport: { width, height } });
+    await page.goto('http://localhost:8080/', { waitUntil: 'load' });
+    const fit = await page.evaluate(() => {
+      const v = document.getElementById('video');
+      return getComputedStyle(v).objectFit;
+    });
+    await page.close();
 
-  const desktopPage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
-  await desktopPage.goto('http://localhost:8080/', { waitUntil: 'load' });
-  const desktopFit = await desktopPage.evaluate(() => {
-    const v = document.getElementById('video');
-    return getComputedStyle(v).objectFit;
-  });
-  if (desktopFit !== 'cover') {
-    throw new Error(`expected object-fit: cover on a wide desktop viewport (1280x800), got "${desktopFit}"`);
+    if (fit !== expected) {
+      throw new Error(`${name} (${width}x${height}): expected object-fit: ${expected}, got "${fit}"`);
+    }
+    console.log(`OK: ${name} (${width}x${height}) -> object-fit: ${fit}`);
   }
-  await desktopPage.close();
 
-  console.log('OK: object-fit is contain on narrow/portrait viewports and cover on wide desktop ones');
   await browser.close();
 })().catch((err) => {
   console.error(err);

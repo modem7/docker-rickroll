@@ -313,6 +313,7 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
             cookieBanner.classList.remove('hidden');
 
             if (choice === 'loading') {
+                document.title = "$PRE_TITLE";
                 loadingScreen.classList.remove('hidden');
                 setTimeout(function () {
                     var fallback = document.getElementById('loading-fallback');
@@ -321,6 +322,12 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
                     }
                 }, 3000);
             } else {
+                // The <title> tag is static HTML, so it always starts out
+                // as PRE_TITLE ("Loading..." by default) regardless of
+                // which state gets picked - override it here so the tab
+                // title actually matches what's on screen instead of
+                // saying "Loading..." over a page that says it errored.
+                document.title = 'Internal Server Error';
                 siteError.classList.remove('hidden');
                 var ref = document.getElementById('error-reference');
                 if (ref) {
