@@ -4,7 +4,7 @@
 # ---- final image, never stored in git/LFS. Transcoding to the various
 # ---- resolutions happens separately and infrequently, not on every image
 # ---- build (see .github/workflows/video-assets.yml).
-FROM --platform=$BUILDPLATFORM alpine:3.20 AS video
+FROM --platform=$BUILDPLATFORM alpine:3.24 AS video
 
 # hadolint ignore=DL3018
 RUN apk add --no-cache curl
