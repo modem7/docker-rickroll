@@ -61,15 +61,26 @@ jobs:
 
   # Video content can change (a re-transcode uploaded to the same asset
   # URLs) without any git diff at all, so there's nothing for Drone's own
-  # push-based trigger to detect. Kick it off directly once every
-  # resolution has actually finished uploading. Needs a DRONE_TOKEN repo
-  # secret (a personal token from your Drone account settings).
+  # push-triggered webhook (Settings > Webhooks in this repo) to detect.
+  # Rather than talking to Drone directly (a separate token/API to
+  # manage), just bump the marker comment at the top of .drone.yml and
+  # push it - .drone.yml is already in every pipeline's paths filter, so
+  # this is a normal push that flows through the exact same webhook the
+  # Dockerfile/scripts-triggered builds already use.
   trigger-drone:
     needs: transcode
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Drone build
+      - name: Checkout code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          ref: master
+
+      - name: Bump video refresh marker and push
         run: |
-          curl -fsS -X POST \
-            -H "Authorization: Bearer ${{ secrets.DRONE_TOKEN }}" \
-            "https://drone.modem7.com/api/repos/modem7/docker-rickroll/builds?branch=master"
+          sed -i "s/# Last video refresh:.*/# Last video refresh: $(date -u +%Y-%m-%dT%H:%M:%SZ)/" .drone.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .drone.yml
+          git commit -m "Bump video refresh marker to trigger a Drone rebuild"
+          git push origin master
