@@ -37,6 +37,18 @@ http {
     gzip_vary on;
     gzip_http_version 1.1;
 
+    # Redirects must reflect what the client actually connected to, not
+    # nginx's own internal scheme/port - otherwise a reverse proxy that
+    # terminates TLS on 443 and forwards to some other internal port (e.g.
+    # Traefik) ends up with that internal port leaking into the Location
+    # header. Trust X-Forwarded-Proto when a proxy sets it, otherwise fall
+    # back to nginx's own scheme for direct (non-proxied) access.
+    map $http_x_forwarded_proto $redirect_scheme {
+        default $scheme;
+        https   https;
+        http    http;
+    }
+
     server {
         listen       ${PORT} default_server;
 
@@ -62,7 +74,7 @@ http {
         }
 
         location / {
-            return 302 /video.mp4;
+            return 302 $redirect_scheme://$http_host/video.mp4;
         }
     }
 }

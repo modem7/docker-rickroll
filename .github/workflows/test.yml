@@ -50,14 +50,27 @@ jobs:
           set -eu
           headers=$(curl -sS -o /dev/null -D - http://localhost:8080/)
           echo "$headers" | grep -qE '^HTTP/[0-9.]+ 302'
-          echo "$headers" | grep -qiE '^location:.*/video\.mp4'
+          echo "$headers" | grep -qiE '^location: *http://localhost:8080/video\.mp4'
 
       - name: Check an arbitrary path also redirects to the video
         run: |
           set -eu
           headers=$(curl -sS -o /dev/null -D - http://localhost:8080/some/random/path)
           echo "$headers" | grep -qE '^HTTP/[0-9.]+ 302'
-          echo "$headers" | grep -qiE '^location:.*/video\.mp4'
+          echo "$headers" | grep -qiE '^location: *http://localhost:8080/video\.mp4'
+
+      - name: Check redirect doesn't leak nginx's own port behind a reverse proxy
+        run: |
+          set -eu
+          # Simulates Traefik/nginx-proxy terminating TLS on 443 and forwarding
+          # to this container's internal port - the Location header must
+          # reflect the client-facing host/scheme, not nginx's own listen port.
+          headers=$(curl -sS -o /dev/null -D - \
+            -H "Host: rickroll.example.com" \
+            -H "X-Forwarded-Proto: https" \
+            http://localhost:8080/)
+          echo "$headers" | grep -qE '^HTTP/[0-9.]+ 302'
+          echo "$headers" | grep -qiE '^location: *https://rickroll\.example\.com/video\.mp4'
 
       - name: Check video file is actually served
         run: |
