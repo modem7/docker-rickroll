@@ -38,7 +38,7 @@ http {
     gzip_http_version 1.1;
 
     server {
-        listen       ${PORT};
+        listen       ${PORT} default_server;
 
         root /usr/share/nginx/html;
 
@@ -67,6 +67,12 @@ http {
     }
 }
 EOF
+
+# Remove the base image's stock welcome-page config - it also listens on
+# ${PORT} and, since it's included before our own server block is defined
+# below, nginx would otherwise treat it as the default handler for this
+# port instead of ours.
+rm -f /etc/nginx/conf.d/default.conf
 
 tee /etc/nginx/conf.d/health-check.conf << 'EOF' >/dev/null
 server {
