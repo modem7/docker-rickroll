@@ -137,14 +137,24 @@ steps:
       - status: [success]
 
   - name: notify-slack
-    image: plugins/slack
+    image: curlimages/curl
     depends_on:
       - build-and-push-480p
       - build-and-push-720p
       - build-and-push-1080p
       - build-and-push-2160p
-    settings:
-      webhook:
+    environment:
+      SLACK_WEBHOOK:
         from_secret: slack_hook
+    # plugins/slack is Drone-native and reads DRONE_BUILD_STATUS, which
+    # Woodpecker doesn't populate - it silently reported "success" even
+    # on a real failure. Building the message ourselves from
+    # CI_PIPELINE_STATUS (a real Woodpecker built-in, proven correct by
+    # this step's own when.status filter having fired on failure).
+    commands:
+      - >
+        curl -fsS -X POST -H 'Content-type: application/json'
+        --data "{\"text\":\"${CI_REPO}#${CI_COMMIT_SHA} (${CI_COMMIT_BRANCH}) by ${CI_COMMIT_AUTHOR}: ${CI_PIPELINE_STATUS} - ${CI_PIPELINE_URL}\"}"
+        "$SLACK_WEBHOOK"
     when:
       - status: [success, failure]
