@@ -76,3 +76,17 @@ steps:
       password:
         from_secret: docker_password
       tags: ${TAGS}
+
+  # CI_PIPELINE_STATUS in a *downstream* workflow (finalize.yaml) only
+  # reflects that workflow's own steps, not whether this one failed -
+  # https://github.com/woodpecker-ci/woodpecker/issues/4337. So the
+  # failure alert lives here, where status: [failure] reliably means
+  # "an earlier step in this same workflow (lint or build-and-push)
+  # failed" - one alert per failing resolution, naming which one.
+  - name: notify-slack-failure
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: slack_hook
+    when:
+      - status: [failure]
