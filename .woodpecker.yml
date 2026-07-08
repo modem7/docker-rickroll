@@ -32,7 +32,7 @@ steps:
     image: hadolint/hadolint:latest-alpine
     commands:
       - hadolint --version
-      - hadolint Dockerfile*
+      - hadolint Dockerfile* --this-flag-does-not-exist # TEMP: force a failure to test the failure-notification path
 
   - name: build-and-push-480p
     image: woodpeckerci/plugin-docker-buildx
