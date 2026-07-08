@@ -136,37 +136,41 @@ steps:
     when:
       - status: [success]
 
-  # TEMP TEST: plugins/slack only reads DRONE_BUILD_STATUS for its
-  # status field and Woodpecker doesn't set it - but since it's just a
-  # literal env var name, feed it ourselves per success/failure branch
-  # (same split-step trick as before) and see if the plugin otherwise
-  # behaves correctly.
+  # gowerstreet/slack is a fork of drone-plugins/drone-slack made
+  # specifically for Woodpecker (its README confirms CI_PIPELINE_STATUS
+  # can't be read automatically since Woodpecker 3.x, matching what we
+  # found ourselves) - status is set explicitly per step instead of
+  # auto-detected, same split as before. Message layout is simpler than
+  # the old Drone one (Project/Branch/Author + a View Build button, no
+  # commit/build-number fields) - accepted tradeoff for a real plugin.
   - name: notify-slack-success
-    image: plugins/slack
+    image: gowerstreet/slack:latest
+    pull: true
     depends_on:
       - build-and-push-480p
       - build-and-push-720p
       - build-and-push-1080p
       - build-and-push-2160p
     settings:
+      status: success
+      description: docker-rickroll build
       webhook:
         from_secret: slack_hook
-    environment:
-      DRONE_BUILD_STATUS: success
     when:
       - status: [success]
 
   - name: notify-slack-failure
-    image: plugins/slack
+    image: gowerstreet/slack:latest
+    pull: true
     depends_on:
       - build-and-push-480p
       - build-and-push-720p
       - build-and-push-1080p
       - build-and-push-2160p
     settings:
+      status: failure
+      description: docker-rickroll build
       webhook:
         from_secret: slack_hook
-    environment:
-      DRONE_BUILD_STATUS: failure
     when:
       - status: [failure]
