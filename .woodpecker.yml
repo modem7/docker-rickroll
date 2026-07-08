@@ -32,7 +32,7 @@ steps:
     image: hadolint/hadolint:latest-alpine
     commands:
       - hadolint --version
-      - hadolint Dockerfile* --this-flag-does-not-exist # TEMP: force a failure to test themaz/drone-slack
+      - hadolint Dockerfile*
 
   - name: build-and-push-480p
     image: woodpeckerci/plugin-docker-buildx
@@ -136,19 +136,87 @@ steps:
     when:
       - status: [success]
 
-  # TEMP TEST: trying themaz/drone-slack directly (original Drone
-  # settings, unchanged) to see whether it reports status correctly
-  # under Woodpecker. If this works, drop the jq/curl steps below in
-  # favor of it - simpler is better if it's actually correct.
-  - name: notify-slack
-    image: themaz/drone-slack
+  # CI_PIPELINE_STATUS isn't actually exposed as a container env var on
+  # this Woodpecker version, even though the when.status filter that
+  # reads it server-side works correctly (proven by the failure case
+  # firing at all) - see woodpecker-ci/woodpecker#4337. Rather than
+  # depend on that value inside the shell, split into two hardcoded
+  # steps and let the filter alone decide which one runs.
+  # Reproduces the themaz/drone-slack default attachment layout (Status/
+  # Branch/Output/Build Number/Commit/Author/Commit Message). Built with
+  # jq rather than raw string interpolation because CI_COMMIT_MESSAGE is
+  # attacker-controlled (anyone who can push a commit sets it) and naive
+  # interpolation into a JSON string breaks - or worse - on quotes.
+  - name: notify-slack-success
+    image: alpine:3
     depends_on:
       - build-and-push-480p
       - build-and-push-720p
       - build-and-push-1080p
       - build-and-push-2160p
-    settings:
-      webhook:
+    environment:
+      SLACK_WEBHOOK:
         from_secret: slack_hook
+    commands:
+      - apk add --no-cache curl jq >/dev/null
+      - COMMIT_SHORT=$(echo "$CI_COMMIT_SHA" | cut -c1-10)
+      - >
+        PAYLOAD=$(jq -n
+        --arg status "success"
+        --arg branch "$CI_COMMIT_BRANCH"
+        --arg output "${CI_REPO}#${CI_PIPELINE_NUMBER}"
+        --arg output_url "$CI_PIPELINE_URL"
+        --arg build "$CI_PIPELINE_NUMBER"
+        --arg commit "$COMMIT_SHORT"
+        --arg commit_url "$CI_PIPELINE_FORGE_URL"
+        --arg author "$CI_COMMIT_AUTHOR"
+        --arg message "$CI_COMMIT_MESSAGE"
+        '{attachments:[{color:"good",fields:[
+        {title:"Status",value:$status,short:true},
+        {title:"Branch",value:$branch,short:true},
+        {title:"Output",value:("<"+$output_url+"|"+$output+">"),short:true},
+        {title:"Build Number",value:$build,short:true},
+        {title:"Commit",value:("<"+$commit_url+"|"+$commit+">"),short:true},
+        {title:"Author",value:$author,short:true},
+        {title:"Commit Message",value:$message,short:false}
+        ]}]}')
+      - curl -fsS -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK"
     when:
-      - status: [success, failure]
+      - status: [success]
+
+  - name: notify-slack-failure
+    image: alpine:3
+    depends_on:
+      - build-and-push-480p
+      - build-and-push-720p
+      - build-and-push-1080p
+      - build-and-push-2160p
+    environment:
+      SLACK_WEBHOOK:
+        from_secret: slack_hook
+    commands:
+      - apk add --no-cache curl jq >/dev/null
+      - COMMIT_SHORT=$(echo "$CI_COMMIT_SHA" | cut -c1-10)
+      - >
+        PAYLOAD=$(jq -n
+        --arg status "failure"
+        --arg branch "$CI_COMMIT_BRANCH"
+        --arg output "${CI_REPO}#${CI_PIPELINE_NUMBER}"
+        --arg output_url "$CI_PIPELINE_URL"
+        --arg build "$CI_PIPELINE_NUMBER"
+        --arg commit "$COMMIT_SHORT"
+        --arg commit_url "$CI_PIPELINE_FORGE_URL"
+        --arg author "$CI_COMMIT_AUTHOR"
+        --arg message "$CI_COMMIT_MESSAGE"
+        '{attachments:[{color:"danger",fields:[
+        {title:"Status",value:$status,short:true},
+        {title:"Branch",value:$branch,short:true},
+        {title:"Output",value:("<"+$output_url+"|"+$output+">"),short:true},
+        {title:"Build Number",value:$build,short:true},
+        {title:"Commit",value:("<"+$commit_url+"|"+$commit+">"),short:true},
+        {title:"Author",value:$author,short:true},
+        {title:"Commit Message",value:$message,short:false}
+        ]}]}')
+      - curl -fsS -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK"
+    when:
+      - status: [failure]
