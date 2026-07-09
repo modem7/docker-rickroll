@@ -348,6 +348,13 @@ tee /usr/share/nginx/html/index.html << EOF >/dev/null
             var events = ['click', 'keydown'];
 
             function reveal() {
+                // The video's been playing muted since page load, so by
+                // the time the decoy actually gets clicked - anywhere
+                // from a second to minutes later - it's already well
+                // past the intro. Jump back to the start so the payoff
+                // always lands on the actual song opening, not wherever
+                // playback happened to be.
+                video.currentTime = 0;
                 video.muted = false;
                 video.play().catch(function () {});
                 document.title = title;

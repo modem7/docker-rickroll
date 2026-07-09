@@ -34,6 +34,11 @@ jobs:
           file: ./Dockerfile
           load: true
           tags: rickroll:test
+          # Same video-fetch stage as ghcr-publish.yml, and this
+          # workflow always builds the same default VIDEO_URL - caching
+          # it means CI stops re-downloading the video on every run.
+          cache-from: type=gha,scope=test
+          cache-to: type=gha,mode=max,scope=test
 
       - name: Start container with default env vars
         run: docker run -d --name rickroll-default -p 8080:8080 rickroll:test
@@ -157,15 +162,32 @@ jobs:
         with:
           node-version: 24
 
-      - name: Install Playwright
+      - name: Install Playwright package
         run: |
           npm init -y >/dev/null
-          npm install --no-save playwright@1
-          # Firefox gets its own engine check alongside Chromium - it's
-          # historically the most divergent on autoplay/gesture policy
-          # enforcement of the mainstream browsers, so a bug that's fine
-          # under one can still be broken under the other.
-          npx playwright install --with-deps chromium firefox
+          # Pinned exact version, not a floating "playwright@1" - the
+          # cache key below is keyed on this version, and an unpinned
+          # install could silently resolve a newer release whose browser
+          # binaries no longer match a stale cache.
+          npm install --no-save playwright@1.61.1
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-1.61.1
+
+      - name: Install Playwright OS dependencies
+        run: npx playwright install-deps chromium firefox
+
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        # Firefox gets its own engine check alongside Chromium - it's
+        # historically the most divergent on autoplay/gesture policy
+        # enforcement of the mainstream browsers, so a bug that's fine
+        # under one can still be broken under the other.
+        run: npx playwright install chromium firefox
 
       - name: Start container with OVERLAY=error
         run: docker run -d --name rickroll-error -p 8080:8080 -e OVERLAY=error rickroll:test

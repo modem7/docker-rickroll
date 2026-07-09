@@ -72,6 +72,17 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
     throw new Error(`expected the cookie banner to be visible alongside ${overlayType}, but it wasn't`);
   }
 
+  // Let the muted autoplay run for a few seconds before clicking, so
+  // currentTime has clearly moved past the intro - this is the whole
+  // point of the check below: a real visitor rarely clicks instantly,
+  // and the payoff should still start from the beginning regardless of
+  // how long the decoy held their attention.
+  await page.waitForTimeout(3000);
+  const beforeClickTime = await page.evaluate(() => document.getElementById('video').currentTime);
+  if (beforeClickTime < 1) {
+    throw new Error(`expected currentTime to have advanced past 1s after 3s of muted autoplay, got ${beforeClickTime}`);
+  }
+
   await page.click(clickSelector);
 
   const unmuted = await waitFor(page, () => {
@@ -88,6 +99,7 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
     const cookie = document.querySelector(cookieSel);
     return {
       paused: v.paused,
+      currentTime: v.currentTime,
       title: document.title,
       overlayVisible: overlay ? !overlay.classList.contains('hidden') : null,
       cookieVisible: cookie ? !cookie.classList.contains('hidden') : null
@@ -96,6 +108,11 @@ async function waitFor(page, predicate, { timeout = 5000, interval = 100 } = {})
 
   if (after.paused) {
     throw new Error('expected video to still be playing after unmuting');
+  }
+  // The whole point of a rickroll is the intro - a visitor who takes a
+  // while to click shouldn't hear the song mid-way through instead.
+  if (after.currentTime >= 1) {
+    throw new Error(`expected video to restart from the beginning on reveal, but currentTime was ${after.currentTime}s right after clicking (was ${beforeClickTime}s before)`);
   }
   if (after.title !== 'Rickroll') {
     throw new Error(`expected title "Rickroll" after interaction, got "${after.title}"`);
