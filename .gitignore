@@ -3,3 +3,6 @@
 MP4/
 *.mp4
 *.mkv
+
+# Claude Code local settings
+.claude/
