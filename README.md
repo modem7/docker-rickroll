@@ -5,7 +5,7 @@
 ![Docker Image Size (720p)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/720p?label=720p) 
 ![Docker Image Size (latest)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/latest?label=latest%2F1080p) 
 ![Docker Image Size (2160p)](https://img.shields.io/docker/image-size/modem7/docker-rickroll/2160p?label=2160p) 
-[![Build Status](https://drone.modem7.com/api/badges/modem7/docker-rickroll/status.svg)](https://drone.modem7.com/modem7/docker-rickroll)
+[![Build Status](https://woodpecker.modem7.com/api/badges/2/status.svg)](https://woodpecker.modem7.com/repos/2)
 [![GitHub last commit](https://img.shields.io/github/last-commit/modem7/docker-rickroll)](https://github.com/modem7/docker-rickroll)
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/modem7)
