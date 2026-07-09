@@ -1,0 +1,171 @@
+# Bumped by video-assets.yml after a successful re-transcode, purely to
+# produce a real commit on this path - the video content itself can
+# change (re-uploaded to the same asset URLs) without any other diff
+# here for the path filter below to detect otherwise.
+# Last video refresh: never
+
+when:
+  - event: [push, manual]
+    branch: master
+    path:
+      include:
+        - Dockerfile
+        - scripts/**
+        - .woodpecker.yml
+
+# All four resolutions are steps in one workflow (not a matrix) so that
+# pushrm/slack below can reliably see whether any of them failed.
+# Matrix permutations are independent workflow runs with no shared
+# status - see https://github.com/woodpecker-ci/woodpecker/issues/4337.
+# Each build step is built from the same Dockerfile but pointed at a
+# different pre-transcoded video asset (see
+# .github/workflows/video-assets.yml). Actual functional testing (env
+# vars, autoplay/unmute behavior, container security posture) happens in
+# .github/workflows/test.yml, not here - lint + build is the only gate
+# before pushing.
+steps:
+  - name: lint-dockerfile
+    image: hadolint/hadolint:latest-alpine
+    commands:
+      - hadolint --version
+      - hadolint Dockerfile*
+
+  - name: build-and-push-480p
+    image: woodpeckerci/plugin-docker-buildx
+    privileged: true
+    depends_on: [lint-dockerfile]
+    settings:
+      repo: ${CI_REPO}
+      dockerfile: Dockerfile
+      purge: true
+      compress: true
+      build_args:
+        BUILDKIT_INLINE_CACHE: "1"
+        VIDEO_URL: https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-480p.mp4
+      cache_from:
+        - type=registry\,ref=${CI_REPO}:480p
+      platforms: linux/amd64,linux/arm64/v8
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      tags: 480p
+
+  - name: build-and-push-720p
+    image: woodpeckerci/plugin-docker-buildx
+    privileged: true
+    depends_on: [lint-dockerfile]
+    settings:
+      repo: ${CI_REPO}
+      dockerfile: Dockerfile
+      purge: true
+      compress: true
+      build_args:
+        BUILDKIT_INLINE_CACHE: "1"
+        VIDEO_URL: https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-720p.mp4
+      cache_from:
+        - type=registry\,ref=${CI_REPO}:720p
+      platforms: linux/amd64,linux/arm64/v8
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      tags: 720p
+
+  - name: build-and-push-1080p
+    image: woodpeckerci/plugin-docker-buildx
+    privileged: true
+    depends_on: [lint-dockerfile]
+    settings:
+      repo: ${CI_REPO}
+      dockerfile: Dockerfile
+      purge: true
+      compress: true
+      build_args:
+        BUILDKIT_INLINE_CACHE: "1"
+        VIDEO_URL: https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-1080p.mp4
+      cache_from:
+        - type=registry\,ref=${CI_REPO}:latest
+      platforms: linux/amd64,linux/arm64/v8
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      tags: 1080p,latest
+
+  - name: build-and-push-2160p
+    image: woodpeckerci/plugin-docker-buildx
+    privileged: true
+    depends_on: [lint-dockerfile]
+    settings:
+      repo: ${CI_REPO}
+      dockerfile: Dockerfile
+      purge: true
+      compress: true
+      build_args:
+        BUILDKIT_INLINE_CACHE: "1"
+        VIDEO_URL: https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-2160p.mp4
+      cache_from:
+        - type=registry\,ref=${CI_REPO}:2160p
+      platforms: linux/amd64,linux/arm64/v8
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      tags: 2160p
+
+  - name: pushrm-dockerhub
+    image: chko/docker-pushrm
+    depends_on:
+      - build-and-push-480p
+      - build-and-push-720p
+      - build-and-push-1080p
+      - build-and-push-2160p
+    environment:
+      DOCKER_USER:
+        from_secret: docker_username
+      DOCKER_PASS:
+        from_secret: docker_password
+      PUSHRM_FILE: README.md
+      PUSHRM_SHORT: Dockerised Rick Roll
+      PUSHRM_TARGET: ${CI_REPO}
+    when:
+      - status: [success]
+
+  # Our own fork/build of GowerStreet/woodpecker-slack, published to
+  # GHCR since upstream never published gowerstreet/slack:latest
+  # publicly (see github.com/GowerStreet/woodpecker-slack/issues/7).
+  # Reads CI_* vars natively - status still has to be set explicitly
+  # per step since Woodpecker doesn't expose CI_PIPELINE_STATUS as a
+  # container env var (woodpecker-ci/woodpecker#4337).
+  - name: notify-slack-success
+    image: ghcr.io/modem7/woodpecker-slack:latest
+    pull: true
+    depends_on:
+      - build-and-push-480p
+      - build-and-push-720p
+      - build-and-push-1080p
+      - build-and-push-2160p
+    settings:
+      status: success
+      description: docker-rickroll build
+      webhook:
+        from_secret: slack_hook
+    when:
+      - status: [success]
+
+  - name: notify-slack-failure
+    image: ghcr.io/modem7/woodpecker-slack:latest
+    pull: true
+    depends_on:
+      - build-and-push-480p
+      - build-and-push-720p
+      - build-and-push-1080p
+      - build-and-push-2160p
+    settings:
+      status: failure
+      description: docker-rickroll build
+      webhook:
+        from_secret: slack_hook
+    when:
+      - status: [failure]
