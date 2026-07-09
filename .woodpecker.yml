@@ -4,13 +4,9 @@
 # here for the path filter below to detect otherwise.
 # Last video refresh: never
 
-# TEMPORARY test scoping while validating on test/woodpecker-migration:
-# branch includes the test branch, and tags are suffixed -test so
-# nothing here touches the real Docker Hub tags. Revert both before
-# merging to master.
 when:
   - event: [push, manual]
-    branch: [master, test/woodpecker-migration]
+    branch: master
     path:
       include:
         - Dockerfile
@@ -47,13 +43,13 @@ steps:
         BUILDKIT_INLINE_CACHE: "1"
         VIDEO_URL: https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-480p.mp4
       cache_from:
-        - type=registry\,ref=${CI_REPO}:480p-test
+        - type=registry\,ref=${CI_REPO}:480p
       platforms: linux/amd64,linux/arm64/v8
       username:
         from_secret: docker_username
       password:
         from_secret: docker_password
-      tags: 480p-test
+      tags: 480p
 
   - name: build-and-push-720p
     image: woodpeckerci/plugin-docker-buildx
@@ -68,13 +64,13 @@ steps:
         BUILDKIT_INLINE_CACHE: "1"
         VIDEO_URL: https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-720p.mp4
       cache_from:
-        - type=registry\,ref=${CI_REPO}:720p-test
+        - type=registry\,ref=${CI_REPO}:720p
       platforms: linux/amd64,linux/arm64/v8
       username:
         from_secret: docker_username
       password:
         from_secret: docker_password
-      tags: 720p-test
+      tags: 720p
 
   - name: build-and-push-1080p
     image: woodpeckerci/plugin-docker-buildx
@@ -89,13 +85,13 @@ steps:
         BUILDKIT_INLINE_CACHE: "1"
         VIDEO_URL: https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-1080p.mp4
       cache_from:
-        - type=registry\,ref=${CI_REPO}:1080p-test
+        - type=registry\,ref=${CI_REPO}:latest
       platforms: linux/amd64,linux/arm64/v8
       username:
         from_secret: docker_username
       password:
         from_secret: docker_password
-      tags: 1080p-test
+      tags: 1080p,latest
 
   - name: build-and-push-2160p
     image: woodpeckerci/plugin-docker-buildx
@@ -110,13 +106,13 @@ steps:
         BUILDKIT_INLINE_CACHE: "1"
         VIDEO_URL: https://github.com/modem7/docker-rickroll/releases/download/video-assets-v1/video-2160p.mp4
       cache_from:
-        - type=registry\,ref=${CI_REPO}:2160p-test
+        - type=registry\,ref=${CI_REPO}:2160p
       platforms: linux/amd64,linux/arm64/v8
       username:
         from_secret: docker_username
       password:
         from_secret: docker_password
-      tags: 2160p-test
+      tags: 2160p
 
   - name: pushrm-dockerhub
     image: chko/docker-pushrm
