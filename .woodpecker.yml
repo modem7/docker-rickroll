@@ -132,40 +132,44 @@ steps:
     when:
       - status: [success]
 
-  # Our own fork/build of GowerStreet/woodpecker-slack, published to
-  # GHCR since upstream never published gowerstreet/slack:latest
-  # publicly (see github.com/GowerStreet/woodpecker-slack/issues/7).
-  # Reads CI_* vars natively - status still has to be set explicitly
-  # per step since Woodpecker doesn't expose CI_PIPELINE_STATUS as a
-  # container env var (woodpecker-ci/woodpecker#4337).
-  - name: notify-slack-success
-    image: ghcr.io/modem7/woodpecker-slack:latest
-    pull: true
+  # Single dynamic-status notifier, replacing notify-slack-success/failure.
+  # CI_PIPELINE_STATUS must stay bare ($VAR, not ${VAR}) - Woodpecker
+  # resolves ${VAR} at compile time, before this value exists
+  # (woodpecker-ci/woodpecker#6826).
+  - name: notify-slack
+    image: alpine
     depends_on:
       - build-and-push-480p
       - build-and-push-720p
       - build-and-push-1080p
       - build-and-push-2160p
-    settings:
-      status: success
-      description: docker-rickroll build
-      webhook:
+    environment:
+      SLACK_WEBHOOK:
         from_secret: slack_hook
+    commands:
+      - apk add --no-cache curl jq >/dev/null
+      - COMMIT_SHORT=$(echo "$CI_COMMIT_SHA" | cut -c1-10)
+      - >
+        PAYLOAD=$(jq -n
+        --arg status "$CI_PIPELINE_STATUS"
+        --arg branch "$CI_COMMIT_BRANCH"
+        --arg output "${CI_REPO}#${CI_PIPELINE_NUMBER}"
+        --arg output_url "$CI_PIPELINE_URL"
+        --arg build "$CI_PIPELINE_NUMBER"
+        --arg commit "$COMMIT_SHORT"
+        --arg commit_url "$CI_PIPELINE_FORGE_URL"
+        --arg author "$CI_COMMIT_AUTHOR"
+        --arg message "$CI_COMMIT_MESSAGE"
+        '{attachments:[{color:(if $status == "success" then "good" else "danger" end),fields:[
+        {title:"Status",value:$status,short:true},
+        {title:"Branch",value:$branch,short:true},
+        {title:"Output",value:("<"+$output_url+"|"+$output+">"),short:true},
+        {title:"Build Number",value:$build,short:true},
+        {title:"Commit",value:("<"+$commit_url+"|"+$commit+">"),short:true},
+        {title:"Author",value:$author,short:true},
+        {title:"Commit Message",value:$message,short:false}
+        ]}]}')
+      - >
+        curl -fsS -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK"
     when:
-      - status: [success]
-
-  - name: notify-slack-failure
-    image: ghcr.io/modem7/woodpecker-slack:latest
-    pull: true
-    depends_on:
-      - build-and-push-480p
-      - build-and-push-720p
-      - build-and-push-1080p
-      - build-and-push-2160p
-    settings:
-      status: failure
-      description: docker-rickroll build
-      webhook:
-        from_secret: slack_hook
-    when:
-      - status: [failure]
+      - status: [success, failure]
