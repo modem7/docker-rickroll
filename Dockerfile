@@ -17,7 +17,7 @@ WORKDIR /video
 RUN curl -fsSL "$VIDEO_URL" -o video.mp4
 
 # ---- Final image ----
-FROM nginxinc/nginx-unprivileged:1.31.3-alpine
+FROM nginxinc/nginx-unprivileged:1.31.4-alpine
 
 USER root
 
