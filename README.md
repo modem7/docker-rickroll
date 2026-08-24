@@ -44,7 +44,7 @@ These are the two decoy states mentioned above - one is shown at random on every
 | :---: | :---: |
 | ![Decoy loading screen](docs/screenshots/decoy-loading.png) | ![Decoy error screen](docs/screenshots/decoy-error.png) |
 
-If you land on one of these and it looks broken, it's not - it's meant to look exactly like that. Give it a click.
+These exist because of browser autoplay restrictions, not because anything is actually wrong: browsers won't let a page play sound until there's been a genuine click/tap/keypress, so the video sits ready and muted in the background while one of these two screens is shown to fish for that first interaction. They're intentionally styled to look mundane or broken rather than like an obvious "click to play" button, since the whole point of the project is the reveal catching you off guard. See [#146](https://github.com/modem7/docker-rickroll/issues/146) for a real report of this being mistaken for a compromise.
 
 # Container Screenshot
 
