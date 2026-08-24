@@ -19,21 +19,14 @@ when:
 # status - see https://github.com/woodpecker-ci/woodpecker/issues/4337.
 # Each build step is built from the same Dockerfile but pointed at a
 # different pre-transcoded video asset (see
-# .github/workflows/video-assets.yml). Actual functional testing (env
-# vars, autoplay/unmute behavior, container security posture) happens in
-# .github/workflows/test.yml, not here - lint + build is the only gate
-# before pushing.
+# .github/workflows/video-assets.yml). All linting and functional testing
+# (Dockerfile lint, env vars, autoplay/unmute behavior, container
+# security posture) happens in .github/workflows/test.yml, not here -
+# this pipeline only builds and pushes images.
 steps:
-  - name: lint-dockerfile
-    image: hadolint/hadolint:latest-alpine
-    commands:
-      - hadolint --version
-      - hadolint Dockerfile*
-
   - name: build-and-push-480p
     image: woodpeckerci/plugin-docker-buildx
     privileged: true
-    depends_on: [lint-dockerfile]
     settings:
       repo: ${CI_REPO}
       dockerfile: Dockerfile
@@ -54,7 +47,6 @@ steps:
   - name: build-and-push-720p
     image: woodpeckerci/plugin-docker-buildx
     privileged: true
-    depends_on: [lint-dockerfile]
     settings:
       repo: ${CI_REPO}
       dockerfile: Dockerfile
@@ -75,7 +67,6 @@ steps:
   - name: build-and-push-1080p
     image: woodpeckerci/plugin-docker-buildx
     privileged: true
-    depends_on: [lint-dockerfile]
     settings:
       repo: ${CI_REPO}
       dockerfile: Dockerfile
@@ -96,7 +87,6 @@ steps:
   - name: build-and-push-2160p
     image: woodpeckerci/plugin-docker-buildx
     privileged: true
-    depends_on: [lint-dockerfile]
     settings:
       repo: ${CI_REPO}
       dockerfile: Dockerfile

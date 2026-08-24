@@ -19,7 +19,7 @@ RUN curl -fsSL "$VIDEO_URL" -o video.mp4
 # ---- Final image ----
 FROM nginxinc/nginx-unprivileged:1.31.4-alpine
 
-USER root
+USER 0
 
 ARG UID=101
 ARG GID=101
@@ -37,7 +37,7 @@ RUN chown $UID:0 /usr/share/nginx/html/index.html
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=10s \
-   cmd curl -fss http://localhost:9090/healthz || exit 1
+    CMD ["sh", "-c", "curl -fss http://localhost:9090/healthz || exit 1"]
 
 STOPSIGNAL SIGQUIT
 
