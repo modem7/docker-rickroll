@@ -5,6 +5,7 @@ on:
     paths:
       - Dockerfile
       - scripts/**
+      - .hadolint.yaml
       - .github/workflows/test.yml
       - .github/scripts/test-autoplay.js
       - .github/scripts/test-mobile-fit.js
@@ -12,13 +13,26 @@ on:
     paths:
       - Dockerfile
       - scripts/**
+      - .hadolint.yaml
       - .github/workflows/test.yml
       - .github/scripts/test-autoplay.js
       - .github/scripts/test-mobile-fit.js
   workflow_dispatch:
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf # v3.1.0
+        with:
+          dockerfile: Dockerfile
+
   test:
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
