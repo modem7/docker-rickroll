@@ -36,6 +36,16 @@ Also published to GHCR if you'd rather pull from there: `ghcr.io/modem7/docker-r
 - The video isn't stored in git. It's fetched from a GitHub Release asset at build time and baked into the image, so the shipped container is still fully self-contained and works offline - git just doesn't carry the binary around.
 - Built for both linux/amd64 and linux/arm64/v8.
 
+## The decoy screens
+
+These are the two decoy states mentioned above - one is shown at random on every visit, with the cookie banner on top of either one. Clicking or pressing a key anywhere unmutes and reveals the video.
+
+| Loading | Error |
+| :---: | :---: |
+| ![Decoy loading screen](docs/screenshots/decoy-loading.png) | ![Decoy error screen](docs/screenshots/decoy-error.png) |
+
+If you land on one of these and it looks broken, it's not - it's meant to look exactly like that. Give it a click.
+
 # Container Screenshot
 
 ![image](https://user-images.githubusercontent.com/4349962/187975538-9b7ec5db-3cf4-4dfa-964c-019eba9e272f.png)
