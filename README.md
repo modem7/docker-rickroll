@@ -36,6 +36,16 @@ Also published to GHCR if you'd rather pull from there: `ghcr.io/modem7/docker-r
 - The video isn't stored in git. It's fetched from a GitHub Release asset at build time and baked into the image, so the shipped container is still fully self-contained and works offline - git just doesn't carry the binary around.
 - Built for both linux/amd64 and linux/arm64/v8.
 
+## The decoy screens
+
+These are the two decoy states mentioned above - one is shown at random on every visit, with the cookie banner on top of either one. Clicking or pressing a key anywhere unmutes and reveals the video.
+
+| Loading | Error |
+| :---: | :---: |
+| ![Decoy loading screen](docs/screenshots/decoy-loading.png) | ![Decoy error screen](docs/screenshots/decoy-error.png) |
+
+These exist because of browser autoplay restrictions: browsers won't let a page play sound until there's been a genuine click/tap/keypress, so the video sits ready and muted in the background while one of these two screens is shown to fish for that first interaction. They're intentionally styled to look mundane or broken rather than like an obvious "click to play" button, since the whole point of the rickroll is the reveal catching you off guard. See [#146](https://github.com/modem7/docker-rickroll/issues/146) for a real report of this being mistaken for a compromise.
+
 # Container Screenshot
 
 ![image](https://user-images.githubusercontent.com/4349962/187975538-9b7ec5db-3cf4-4dfa-964c-019eba9e272f.png)
