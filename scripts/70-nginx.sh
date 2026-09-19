@@ -4,6 +4,7 @@ set -eu
 
 PORT="${PORT:-"8080"}"
 VIDEO_FILE="${VIDEO_FILE:-"video.mp4"}"
+VIDEO_FILE="${VIDEO_FILE#/}"
 
 # Create nginx conf with port variable
 tee /etc/nginx/nginx.conf << 'EOF' >/dev/null

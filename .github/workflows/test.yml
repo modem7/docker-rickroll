@@ -73,7 +73,7 @@ jobs:
           echo "$html" | grep -q '<title>Loading...</title>'
           echo "$html" | grep -qE '<video id="video"[^>]*\bautoplay\b'
           echo "$html" | grep -qE '<video id="video"[^>]*\bmuted\b'
-          echo "$html" | grep -q 'source src="video.mp4"'
+          echo "$html" | grep -q 'source src="/video.mp4"'
           echo "$html" | grep -q 'id="cookie-banner"'
           echo "$html" | grep -q 'id="site-error"'
           echo "$html" | grep -q 'id="loading-screen"'
@@ -91,6 +91,7 @@ jobs:
           [ "$status" = "404" ]
           html=$(curl -sS http://localhost:8080/some/random/path)
           echo "$html" | grep -q 'id="video"'
+          echo "$html" | grep -q 'source src="/video.mp4"'
 
       - name: Check container runs as non-root
         run: |
@@ -161,7 +162,7 @@ jobs:
           echo "$html" | grep -q 'height: 50vh'
           echo "$html" | grep -q 'width: 50%'
           echo "$html" | grep -q 'object-fit: contain'
-          echo "$html" | grep -q 'source src="custom.mp4"'
+          echo "$html" | grep -q 'source src="/custom.mp4"'
           if echo "$html" | grep -qE '<video id="video"[^>]*\bloop\b'; then
             echo "unexpected loop attribute present with LOOP=false"
             exit 1
