@@ -10,6 +10,7 @@ WIDTH="${WIDTH:-"100%"}"
 OBJECT_FIT="${OBJECT_FIT:-"cover"}"
 LOOP="${LOOP:-"true"}"
 VIDEO_FILE="${VIDEO_FILE:-"video.mp4"}"
+VIDEO_FILE="/${VIDEO_FILE#/}"
 OVERLAY="${OVERLAY:-"random"}"
 
 LOOP_ATTR=""
