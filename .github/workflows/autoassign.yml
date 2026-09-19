@@ -3,7 +3,7 @@ name: Issue and PR assignment
 on:
   issues:
     types: [opened]
-  pull_request:
+  pull_request_target:
     types: [opened]
   schedule:
     - cron: '0 */6 * * *'
@@ -22,7 +22,7 @@ jobs:
             assignees: modem7
 
   auto-assign-pr:
-    if: github.event_name == 'pull_request' && github.actor != 'renovate[bot]'
+    if: github.event_name == 'pull_request_target' && github.actor != 'renovate[bot]'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
