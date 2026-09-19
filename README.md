@@ -72,7 +72,7 @@ All tags are built from the same image - only the baked-in video resolution diff
 | WIDTH | CSS width of the video element. | 100% |
 | OBJECT_FIT | CSS `object-fit` value for the video (`cover`, `contain`, etc). | cover |
 | LOOP | Whether the video loops (`true`/`false`). | true |
-| VIDEO_FILE | Filename of the video to serve, relative to the web root. | video.mp4 |
+| VIDEO_FILE | Filename of the video to serve, relative to the web root. A full URL (`https://...`) is also accepted and used as-is. | video.mp4 |
 
 # Configuration example
 
