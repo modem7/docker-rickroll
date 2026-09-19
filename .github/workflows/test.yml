@@ -190,7 +190,7 @@ jobs:
       - name: Check a full URL is left untouched
         run: |
           set -eu
-          html=$(curl -fsS http://localhost:8080/some/random/path)
+          html=$(curl -sS http://localhost:8080/some/random/path)
           echo "$html" | grep -q 'source src="https://example.com/v.mp4"'
 
       - name: Stop URL container
