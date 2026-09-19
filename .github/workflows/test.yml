@@ -172,6 +172,30 @@ jobs:
       - name: Stop custom container
         run: docker rm -f rickroll-custom
 
+      - name: Start container with a full URL as VIDEO_FILE
+        run: |
+          docker run -d --name rickroll-url -p 8080:8080 \
+            -e VIDEO_FILE=https://example.com/v.mp4 \
+            rickroll:test
+
+      - name: Wait for URL container to be healthy
+        run: |
+          for i in $(seq 1 30); do
+            docker exec rickroll-url curl -fsS http://localhost:9090/healthz && exit 0
+            sleep 1
+          done
+          docker logs rickroll-url
+          exit 1
+
+      - name: Check a full URL is left untouched
+        run: |
+          set -eu
+          html=$(curl -sS http://localhost:8080/some/random/path)
+          echo "$html" | grep -q 'source src="https://example.com/v.mp4"'
+
+      - name: Stop URL container
+        run: docker rm -f rickroll-url
+
       - name: Set up Node
         uses: actions/setup-node@v7
         with:

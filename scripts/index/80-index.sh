@@ -10,7 +10,10 @@ WIDTH="${WIDTH:-"100%"}"
 OBJECT_FIT="${OBJECT_FIT:-"cover"}"
 LOOP="${LOOP:-"true"}"
 VIDEO_FILE="${VIDEO_FILE:-"video.mp4"}"
-VIDEO_FILE="/${VIDEO_FILE#/}"
+case "$VIDEO_FILE" in
+    *://*) ;;
+    *) VIDEO_FILE="/${VIDEO_FILE#/}" ;;
+esac
 OVERLAY="${OVERLAY:-"random"}"
 
 LOOP_ATTR=""
