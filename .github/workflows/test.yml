@@ -197,7 +197,7 @@ jobs:
         run: docker rm -f rickroll-url
 
       - name: Set up Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@v7.1.0
         with:
           node-version: 24
 
